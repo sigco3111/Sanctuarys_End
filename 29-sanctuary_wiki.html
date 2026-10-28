@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>생츄어리즈 엔드 — 게임 위키</title>
+<link href="vendor/fonts/notoserifkr/notoserifkr.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0a07; --panel:#16110a; --panel2:#1d1710; --ink:#e8dcc4; --dim:#a8987a;
+    --faint:#8a7a5a; --line:#2a2218; --gold:#e6b84d; --goldd:#c4a060;
+    --c-common:#c8b89a; --c-magic:#6a8ad8; --c-rare:#e0c84d; --c-set:#5ad65a; --c-unique:#d08a3a;
+    --fire:#ff7a3a; --frost:#7fd0ff; --poison:#8fe07a; --light:#cfa8ff; --phys:#d8d8e8;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(circle at 50% -10%,#1a130b,#0d0a07 60%);color:var(--ink);
+    font:15px/1.6 'Noto Serif KR',Georgia,"Times New Roman",serif;}
+  a{color:var(--goldd);text-decoration:none}
+  a:hover{color:var(--gold)}
+  h1,h2,h3,h4{font-family:'Noto Serif KR',Georgia,serif;color:var(--gold);font-weight:normal;letter-spacing:.5px}
+  h2{font-size:28px;margin:0 0 4px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  h3{font-size:20px;color:var(--goldd);margin:26px 0 8px}
+  h4{font-size:16px;color:var(--c-common);margin:18px 0 6px}
+  code{font-family:"Consolas",monospace;background:#0a0805;border:1px solid var(--line);
+    padding:1px 6px;border-radius:4px;color:#d8c89a;font-size:13px}
+  .layout{display:flex;min-height:100vh}
+  /* ---- sidebar ---- */
+  nav.side{width:248px;flex:0 0 248px;background:linear-gradient(180deg,#120d07,#0a0705);
+    border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow-y:auto;padding:0 0 40px}
+  nav.side .brand{padding:20px 18px 12px;border-bottom:1px solid var(--line)}
+  nav.side .brand .t{font-size:20px;color:var(--gold);font-family:'Noto Serif KR',Georgia}
+  nav.side .brand .s{font-size:11px;color:var(--faint);letter-spacing:2px;text-transform:uppercase}
+  nav.side .search{padding:12px 14px}
+  nav.side .search input{width:100%;background:#0a0805;border:1px solid var(--line);color:var(--ink);
+    padding:8px 10px;border-radius:6px;font:13px 'Noto Serif KR',Georgia;outline:none}
+  nav.side .search input:focus{border-color:var(--goldd)}
+  nav.side a{display:block;padding:6px 18px;color:var(--dim);font-size:14px;border-left:3px solid transparent}
+  nav.side a:hover{background:#160f08;color:var(--ink)}
+  nav.side a.active{color:var(--gold);border-left-color:var(--gold);background:#160f08}
+  nav.side .grp{padding:14px 18px 4px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--faint)}
+  /* ---- content ---- */
+  main{flex:1;max-width:1080px;margin:0 auto;padding:34px 46px 120px}
+  section{margin-bottom:54px;scroll-margin-top:20px}
+  p{margin:8px 0}
+  .lead{color:var(--dim);font-size:16px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:10px;padding:16px 18px}
+  .card h4{margin-top:0}
+  .pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);
+    color:var(--dim);background:#0a0805;margin:0 4px 4px 0}
+  .tag-active{color:var(--fire);border-color:#5a2e18}
+  .tag-passive{color:var(--frost);border-color:#244055}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--goldd);font-weight:normal;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+  tbody tr:hover{background:#140e07}
+  td code{white-space:nowrap}
+  .num{text-align:right;font-family:Consolas,monospace;color:#d8c89a;white-space:nowrap}
+  .note{background:#140f07;border-left:3px solid var(--goldd);padding:10px 14px;border-radius:0 6px 6px 0;
+    margin:14px 0;color:var(--dim);font-size:14px}
+  .warn{border-left-color:#b06a2a}
+  .rc-common{color:var(--c-common)} .rc-magic{color:var(--c-magic)} .rc-rare{color:var(--c-rare)}
+  .rc-set{color:var(--c-set)} .rc-unique{color:var(--c-unique)}
+  .swatch{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .kbd{font-family:Consolas,monospace;background:#0a0805;border:1px solid var(--line);border-bottom-width:2px;
+    padding:1px 8px;border-radius:5px;color:var(--ink);font-size:13px}
+  ul.clean{list-style:none;padding-left:0}
+  ul.clean li{padding:4px 0;border-bottom:1px solid var(--line)}
+  .formula{font-family:Consolas,monospace;font-size:13px;color:#d8c89a;background:#0a0805;
+    border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:8px 0;overflow-x:auto}
+  .muted{color:var(--faint)}
+  .toc-top{font-size:12px;color:var(--faint)}
+  .no-results{display:none;color:var(--dim);padding:40px;text-align:center;font-size:16px}
+  body.searching section{display:none}
+  body.searching section.has-match{display:block}
+  body.searching .hide-row{display:none}
+  hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+  .legend{font-size:12px;color:var(--faint);margin-top:6px}
+  @media(max-width:820px){
+    nav.side{position:static;width:100%;height:auto;flex-basis:auto}
+    .layout{flex-direction:column}
+    main{padding:22px}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="side">
+  <div class="brand">
+    <div class="t">Sanctuary's End</div>
+    <div class="s">필드 코덱스 · v50</div>
+  </div>
+  <div class="search"><input id="q" type="text" placeholder="위키 검색…" autocomplete="off"></div>
+
+  <div class="grp">기본</div>
+  <a href="#overview">개요</a>
+  <a href="#controls">조작 &amp; 키 설정</a>
+  <a href="#classes">직업</a>
+  <a href="#stats">능력치 &amp; 속성</a>
+  <a href="#leveling">레벨업 &amp; 경험치</a>
+
+  <div class="grp">전투</div>
+  <a href="#combat">전투 &amp; 피해</a>
+  <a href="#status">상태 효과</a>
+  <a href="#skills">액티브 스킬</a>
+  <a href="#forest">스킬 숲 (패시브)</a>
+  <a href="#effects">특수 효과</a>
+
+  <div class="grp">전리품</div>
+  <a href="#items">아이템 &amp; 등급</a>
+  <a href="#affixes">접두/접미 옵션</a>
+  <a href="#uniques">유니크 아이템</a>
+  <a href="#sets">세트 아이템</a>
+  <a href="#smith">강화, 마법부여 &amp; 보석</a>
+  <a href="#economy">경제 &amp; 마을 시설</a>
+
+  <div class="grp">세계</div>
+  <a href="#zones">지역 &amp; 이동</a>
+  <a href="#difficulty">난이도 &amp; 스케일링</a>
+  <a href="#monsters">몬스터</a>
+  <a href="#elites">엘리트 &amp; 챔피언</a>
+  <a href="#events">던전 층 이벤트</a>
+  <a href="#bosses">보스</a>
+  <a href="#save">세이브</a>
+
+  <div class="grp">참고</div>
+  <a href="#changelog">버전 역사</a>
+</nav>
+
+<main>
+  <div class="no-results" id="noResults">검색 결과가 없습니다.</div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section id="overview">
+    <h2>개요</h2>
+    <p class="lead">생츄어리즈 엔드는 탑다운 액션 RPG 던전 크롤러입니다. 직업을 고르고, 야생과 끝없는 던전에서
+    몬스터를 처치하고, 더 좋은 전리품을 모으고, 패시브 스킬 숲을 키우며, 다섯 층마다 보스와 싸우기 위해
+    더 깊이 내려가세요.</p>
+    <div class="grid g3">
+      <div class="card"><h4>목표</h4><p>디센트를 최대한 깊이 내려가세요. 5층마다 보스가 있습니다.
+      정해진 엔딩은 없고, 깊이는 무한히 스케일됩니다.</p></div>
+      <div class="card"><h4>순환</h4><p>전투 → 전리품 → 마을 귀환 → 장비 판매·강화·재련·소켓
+      → 스킬 &amp; 어빌리티 포인트 사용 → 더 깊이 잠수.</p></div>
+      <div class="card"><h4>직업</h4><p>전사, 마법사, 도적. 각각 고유한 기본 능력치, 성장,
+      피해 배율과 해금 가능한 액티브 스킬 목록을 가집니다.</p></div>
+    </div>
+    <div class="note">이 위키는 게임 버전 <strong>v50</strong>(모듈식
+    <code>sanctuary.html</code> + <code>game.js</code> 빌드)을 다룹니다. 모든 수치는 게임의 데이터
+    테이블과 전투 공식에서 직접 가져왔습니다. 엔진이 값을 제한하는 경우 그 상한을 표기했습니다.
+    각 릴리스에서 바뀐 내용은 <a href="#changelog">버전 역사</a>를 참고하세요.</div>
+  </section>
+
+  <!-- ============ CONTROLS ============ -->
+  <section id="controls">
+    <h2>조작 &amp; 키 설정</h2>
+    <h3>마우스</h3>
+    <table>
+      <thead><tr><th>입력</th><th>동작</th></tr></thead>
+      <tbody>
+        <tr><td><b>왼쪽 클릭</b></td><td>지점으로 이동. 몬스터를 클릭하면 공격합니다(사거리까지 자동 이동).</td></tr>
+        <tr><td><b>왼쪽 유지</b></td><td>커서를 향해 계속 이동 / 공격.</td></tr>
+        <tr><td><b>오른쪽 클릭</b></td><td><b>RMB</b> 액션 바 슬롯의 어빌리티를 커서 방향으로 시전.</td></tr>
+        <tr><td><b>오른쪽 유지</b></td><td>RMB 어빌리티를 계속 시전(근접 공격이 아니고 마나가 있으면).</td></tr>
+        <tr><td><b>마우스 휠</b></td><td>카메라 확대/축소(28–72 범위). 창이나 모달이 열려 있으면 비활성.</td></tr>
+      </tbody>
+    </table>
+    <h3>기본 키</h3>
+    <p class="muted">모두 설정 → 조작에서 다시 지정할 수 있습니다. 이제 <span class="kbd">1</span>–<span class="kbd">4</span>는
+    액션 바의 네 개 키 슬롯을 <b>시전</b>합니다. 키 지정은 <em>물리적 키 코드</em>를 사용하므로
+    AZERTY/QWERTZ에서도 안전하며, 오래된 세이브는 자동으로 이전됩니다.</p>
+    <table>
+      <thead><tr><th>키</th><th>동작</th></tr></thead>
+      <tbody>
+        <tr><td><span class="kbd">I</span> / <span class="kbd">B</span></td><td>인벤토리</td></tr>
+        <tr><td><span class="kbd">K</span></td><td>스킬 숲 (패시브 트리)</td></tr>
+        <tr><td><span class="kbd">T</span></td><td>마을로 귀환</td></tr>
+        <tr><td><span class="kbd">E</span></td><td>상호작용 (차원문, NPC, 웨이포인트, 가마솥)</td></tr>
+        <tr><td><span class="kbd">Space</span></td><td>생명력 포션 마시기 (지속 피해 하나도 정화)</td></tr>
+        <tr><td><span class="kbd">Q</span></td><td>마나 포션 마시기</td></tr>
+        <tr><td><span class="kbd">G</span></td><td>웨이포인트 지도 (빠른 이동)</td></tr>
+        <tr><td><span class="kbd">M</span></td><td>소리 켜기/끄기</td></tr>
+        <tr><td><span class="kbd">H</span> / <span class="kbd">?</span></td><td>도움말</td></tr>
+        <tr><td><span class="kbd">`</span> / <span class="kbd">~</span></td><td>디버그 오버레이 (FPS, 드로우, 엔티티 수)</td></tr>
+        <tr><td><span class="kbd">1</span>–<span class="kbd">4</span></td><td>액션 바 스킬 슬롯 1–4 시전 (왼쪽/오른쪽 클릭은 LMB &amp; RMB 슬롯)</td></tr>
+        <tr><td><span class="kbd">Esc</span></td><td>열린 창이나 모달 닫기 / 취소</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ CLASSES ============ -->
+  <section id="classes">
+    <h2>직업</h2>
+    <p>직업은 시작 속성, 레벨당 성장, 피해 배율, 그리고 레벨업하며 해금되는 액티브 스킬 세트를 결정합니다.
+    네 직업 모두 같은 패시브 스킬 숲을 공유하며, 각자 자기 구역에서 시작합니다.</p>
+    <table>
+      <thead><tr><th>직업</th><th>플레이스타일</th><th>STR</th><th>DEX</th><th>VIT</th><th>ENG</th>
+        <th>HP / 레벨</th><th>MP / 레벨</th><th>DMG / 레벨</th><th>배율</th></tr></thead>
+      <tbody>
+        <tr><td><b>전사</b></td><td>난투형 — 높은 생명력, 강한 근접.</td>
+          <td class="num">18</td><td class="num">10</td><td class="num">16</td><td class="num">6</td>
+          <td class="num">+24</td><td class="num">+5</td><td class="num">+4</td><td>근접 ×1.15</td></tr>
+        <tr><td><b>마법사</b></td><td>유리 대포 — 주문은 강력, 생명력은 낮음.</td>
+          <td class="num">8</td><td class="num">10</td><td class="num">10</td><td class="num">20</td>
+          <td class="num">+14</td><td class="num">+12</td><td class="num">+2</td><td>주문 ×1.30</td></tr>
+        <tr><td><b>도적</b></td><td>신속형 — 치명타 &amp; 속도, 단검 투척.</td>
+          <td class="num">12</td><td class="num">20</td><td class="num">11</td><td class="num">9</td>
+          <td class="num">+18</td><td class="num">+7</td><td class="num">+3</td><td>치명타 +8%</td></tr>
+        <tr><td><b>야만용사</b> <span class="pill">v50</span></td><td>분노의 화신 — 빠른 중근접, 출혈과 충격파.</td>
+          <td class="num">20</td><td class="num">12</td><td class="num">14</td><td class="num">4</td>
+          <td class="num">+22</td><td class="num">+4</td><td class="num">+5</td><td>근접 ×1.10 · 치명타 +4%</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">모든 캐릭터는 레벨 1에 기본 <code>HP 100 / MP 50 / DMG 10</code>,
+    생명력 포션 4개, 마나 포션 2개, 골드 0으로 시작합니다.</p>
+    <h3>무료 시작 키트 (레벨 1)</h3>
+    <p class="muted">모든 직업은 <b>타격</b>과 자신의 레벨 1 어빌리티를 무료로 가집니다. 그 외 액티브는
+    직업 레벨에 도달한 뒤 <b>어빌리티 포인트를 써서 해금</b>합니다 — <a href="#skills">액티브 스킬</a> 참고.</p>
+    <table>
+      <thead><tr><th>직업</th><th>레벨 1 보유</th></tr></thead>
+      <tbody>
+        <tr><td>전사</td><td>타격, <b>베어내기</b></td></tr>
+        <tr><td>마법사</td><td>타격, <b>화염구</b></td></tr>
+        <tr><td>도적</td><td>타격, <b>다중 사격</b></td></tr>
+        <tr><td>야만용사</td><td>타격, <b>찢어발기기</b></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section id="stats">
+    <h2>능력치 &amp; 속성</h2>
+    <div class="note"><strong>수동 속성 포인트 배정은 없습니다</strong>. 속성은 직업 기본값, 스킬 숲에서
+    지나가며 얻는 보너스, 아이템 옵션에서 나옵니다. 레벨업마다 <strong>두 개의 별도 포인트 풀</strong>을 줍니다:
+    패시브 <a href="#forest">스킬 숲</a>용 <b>스킬 포인트 2개</b>와 액티브 해금 및 <a href="#skills">룬 트리</a>
+    배정용 <b>어빌리티 포인트 1개</b>.</div>
+    <h3>네 가지 속성</h3>
+    <table>
+      <thead><tr><th>속성</th><th>포인트당</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><b>힘 (STR)</b></td><td>+0.5 피해</td><td>순수 무기 위력.</td></tr>
+        <tr><td><b>민첩 (DEX)</b></td><td>+0.1% 치명타 확률 &amp; 더 빠른 공격</td>
+          <td>포인트당 공격 간격을 <code>1.2 ms</code> 줄입니다.</td></tr>
+        <tr><td><b>활력 (VIT)</b></td><td>+4 생명력, +0.3 생명력/초 재생</td><td>% 생명력 배율 전에 적용. 재생(v46 신규)은 최대치 미만일 때만 작동.</td></tr>
+        <tr><td><b>에너지 (ENG)</b></td><td>+3 마나, +0.2 마나/초 재생</td><td>시전자를 위한 더 큰 마나 풀. 재생(v46 신규)은 기본 마나 재생에 더해집니다.</td></tr>
+      </tbody>
+    </table>
+    <h3>능력치 계산 방식</h3>
+    <p>장비/레벨/숲이 바뀔 때마다 엔진은 파생 능력치를 대략 이렇게 다시 계산합니다:</p>
+    <div class="formula">피해     = base.dmg + gear.dmg + floor(STR × 0.5)
+생명력   = (base.hpMax + gear.hp + VIT × 4) × (1 + 0.08·Toughness + %Life/100)
+마나     = base.mpMax + gear.mp + ENG × 3
+방어력   = gear.armor × (1 + 0.10·IronSkin + %Armor/100)
+치명타 % = 5 + gear.crit + DEX × 0.1 + 직업 보너스 + 2·Precision + 2·DeadlyAim   (상한 90%)
+마나 재생 = 4/초 × (1 + 0.4·Meditation) + ENG × 0.2/초 + 장비 "+마나 재생"
+생명력 재생 = VIT × 0.3/초 + 장비 "+생명력 재생"        (최대 생명력 미만일 때만)</div>
+    <p class="muted">"base" 값은 레벨마다 직업의 HP/MP/DMG 성장치만큼 커집니다. 근접/주문
+    배율(<a href="#combat">전투</a> 참고)은 능력치 창의 피해 숫자에 포함되지 않고 적중 순간에 적용됩니다.</p>
+  </section>
+
+  <!-- ============ LEVELING ============ -->
+  <section id="leveling">
+    <h2>레벨업 &amp; 경험치</h2>
+    <table>
+      <thead><tr><th>항목</th><th>값</th></tr></thead>
+      <tbody>
+        <tr><td>레벨 2 필요 경험치</td><td class="num">30</td></tr>
+        <tr><td>경험치 곡선</td><td>각 레벨 요구량 = 이전 × <b>1.45</b> (반올림)</td></tr>
+        <tr><td>레벨업 시</td><td>HP/MP/DMG가 직업 성장치만큼 증가; <b>스킬 포인트 +2</b>; 체력 &amp; 마나 완전 회복</td></tr>
+        <tr><td>액티브 스킬 해금</td><td>직업별 레벨에 자동 부여 (<a href="#skills">액티브 스킬</a> 참고)</td></tr>
+      </tbody>
+    </table>
+    <div class="note">레벨별 필요 경험치 근사치: 30 → 44 → 64 → 93 → 135 → 196 → 284 …
+    (단계마다 ≈ ×1.45).</div>
+  </section>
+
+  <!-- ============ COMBAT ============ -->
+  <section id="combat">
+    <h2>전투 &amp; 피해</h2>
+    <h3>피해 주기</h3>
+    <p>근접 공격은 <code>player.dmg × meleeMult × skillMult + rand(-3,3)</code>을 굴립니다. 주문은
+    대신 <code>spellMult</code>를 씁니다. 배율은 직업과 패시브에서 나옵니다:</p>
+    <div class="formula">meleeMult = classMelee(전사 ×1.15) × (1 + 0.06·Berserk + (%Melee + %Damage)/100)
+spellMult = classSpell(마법사 ×1.30)  × (1 + 0.06·ArcaneMind + (%Spell + %Damage)/100)</div>
+    <h3>치명타</h3>
+    <table>
+      <thead><tr><th>항목</th><th>값</th></tr></thead>
+      <tbody>
+        <tr><td>기본 치명타 확률</td><td>5% + DEX×0.1% + 보너스, <b>상한 90%</b></td></tr>
+        <tr><td>치명타 배율</td><td>보통 <b>×2</b>; "삼중 치명타" 효과가 있으면 <b>×3</b>, 여기에 <code>+% 치명타 피해</code> 가산</td></tr>
+      </tbody>
+    </table>
+    <h3>피해 받기 (경감)</h3>
+    <p>받는 피해는 정해진 관문을 거칩니다 — <b>회피</b> 판정으로 아예 피할 수 있고, 이후 방어력, 고정
+    피해 감소, 속성 저항, 전투 함성, 마나 보호막이 차례로 남은 피해를 깎습니다:</p>
+    <div class="formula">1. 회피          → min(회피%, 60) 확률로 피해 0                  [v49]
+2. 방어력        → ×(1 − min(armor/(armor+40), 75%))
+3. 피해 감소     → ×(1 − min(고정DR%, 50))                     [v49]
+4. 저항          → ×(1 − min(속성저항% + 전체저항%, 75))       (속성별)
+5. 전투 함성     → ×(1 − cryDR)                                지속 중
+6. 마나 보호막   → 남은 피해의 일부를 생명력보다 마나로 먼저 흡수</div>
+    <p class="muted"><span class="pill">v49</span> 저항은 <b>속성별 + 전체 저항</b>으로 적용되며
+    75% 상한 — 같은 상한이 직접 타격과 지속 피해 모두에 적용됩니다 (출혈은 물리 속성이라
+    <b>저항 불가</b>).</p>
+    <table>
+      <thead><tr><th>방어력</th><th>경감</th></tr></thead>
+      <tbody>
+        <tr><td class="num">20</td><td class="num">33%</td></tr>
+        <tr><td class="num">40</td><td class="num">50%</td></tr>
+        <tr><td class="num">80</td><td class="num">67%</td></tr>
+        <tr><td class="num">120 +</td><td class="num">75% (상한)</td></tr>
+      </tbody>
+    </table>
+    <h3>공격 &amp; 이동 속도</h3>
+    <div class="formula">공격 간격 (ms) = clamp((420 − DEX×1.2) × (1−Haste) × (1−IAS%/100), 150, 420)
+표시 공격속도/초   = 1000 / 간격        → 2.38/s ~ 6.67/s
+이동 속도          = 0.32 × (1 + min(이동보너스, 75%))</div>
+    <h3>흡수, 적중 시 생명력 &amp; 가시</h3>
+    <ul class="clean">
+      <li><b>생명력 흡수</b> — 입힌 피해의 %만큼 회복.</li>
+      <li><b>마나 흡수</b> — 입힌 피해의 %만큼 마나 회복.</li>
+      <li><b>적중 시 생명력</b> <span class="pill">v49</span> — 적중할 때마다 피해량과 무관하게
+        <em>고정</em> 생명력을 회복 (빠른 다단 히트 스킬에 강함).</li>
+      <li><b>가시</b> — 근접 공격자가 때릴 때 고정 피해를 반사.</li>
+    </ul>
+  </section>
+
+  <!-- ============ STATUS ============ -->
+  <section id="status">
+    <h2>상태 효과</h2>
+    <p>스킬과 옵션의 적중 효과는 시간제 상태를 겁니다. 지속 피해(DoT) 상태는 초당 유발 타격의 일부를
+    입힙니다. 같은 상태는 최대 <b>3회</b> 중첩되고, 다시 걸면 지속 시간이 갱신됩니다.</p>
+    <table>
+      <thead><tr><th>상태</th><th>지속</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--fire)"><b>화상</b></td><td class="num">2.2 초</td>
+          <td>DoT: 초당 타격의 30%.</td></tr>
+        <tr><td style="color:#ff5b6b"><b>출혈</b></td><td class="num">3.0 초</td>
+          <td>DoT: 초당 타격의 25%.</td></tr>
+        <tr><td style="color:var(--poison)"><b>중독</b></td><td class="num">2.6 초</td>
+          <td>DoT: 초당 타격의 22%, 오래 남을수록 <b>최대 ×3까지 증가</b>.</td></tr>
+        <tr><td style="color:var(--frost)"><b>냉각</b></td><td class="num">1.6 초</td>
+          <td>대상의 이동 속도를 늦춥니다(약 ×0.5). 많은 냉기 스킬이 별도 감속도 겁니다.</td></tr>
+        <tr><td style="color:#cfc8ff"><b>기절</b></td><td class="num">0.8 초</td>
+          <td>이동·공격 불가.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><b>생명력 포션</b>을 마시면 걸려 있는 화상 / 출혈 / 중독 하나도 정화합니다.</div>
+  </section>
+
+  <!-- ============ SKILLS ============ -->
+  <section id="skills">
+    <h2>액티브 스킬</h2>
+    <p><span class="pill">v49</span> 액티브는 이제 <b>6칸 액션 바</b>로 돌아가고 <b>어빌리티 포인트를 써서
+    해금</b>합니다 — 레벨마다(레벨 2부터) <b>어빌리티 포인트 1개</b>를 얻습니다. 어빌리티의 직업 레벨에
+    도달하고 포인트를 쓰면 내 것이 됩니다. 같은 포인트 풀로 각 스킬의 <a href="#runes">룬 트리</a> 노드도
+    삽니다. 타격과 각 직업의 레벨 1 어빌리티는 무료입니다.</p>
+    <p>대부분의 스킬은 <b>5</b>등급까지 오릅니다. 스킬의 유효 등급은 <b>권능</b> 룬 노드와
+    <code>+모든 스킬</code> 보너스로 올라가며, 둘 다 스킬의 피해와 효과를 키웁니다.</p>
+    <p class="muted"><span class="pill">v47</span> 슬롯에 마우스를 올리면 실시간 <b>툴팁</b>이 뜹니다 — 현재 피해,
+    마나 소모, 재사용 대기, 적중 효과, 배정된 룬 — 스킬이 실제로 발사되는 계수표 그대로 계산하므로
+    숫자가 어긋나지 않습니다.</p>
+
+    <h3>직업별 해금 레벨</h3>
+    <table>
+      <thead><tr><th>직업</th><th>스킬 : 해금 레벨</th></tr></thead>
+      <tbody>
+        <tr><td><b>전사</b></td><td>타격 1, 베어내기 1, 지면 강타 3, 돌진 5, 회전베기 6, 전투 함성 9, 도약 10, 재기의 숨결 12</td></tr>
+        <tr><td><b>마법사</b></td><td>타격 1, 화염구 1, 서리 2, 서리 폭발 4, 비전 구슬 4, 노바 6, 점멸 8, 연쇄 번개 10, 눈보라 13, 운석 14</td></tr>
+        <tr><td><b>도적</b></td><td>타격 1, 다중 사격 1, 그림자 걸음 5, 일제 투척 6, 칼날 부채 7, 점멸 8, 순간이동 폭풍 9, 재기의 숨결 12</td></tr>
+      </tbody>
+    </table>
+
+    <h3>모든 액티브 스킬</h3>
+    <p class="legend">비용 = 마나 · CD = 재사용 대기 · "적중 시" = 거는 상태 이상.</p>
+    <table>
+      <thead><tr><th>스킬</th><th>유형</th><th class="num">비용</th><th class="num">CD</th><th>적중 시</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td><b>타격</b></td><td>근접</td><td class="num">0</td><td class="num">—</td><td>—</td><td>기본 근접 공격 (모두 보유).</td></tr>
+        <tr><td><b>베어내기</b></td><td>근접</td><td class="num">6</td><td class="num">0.5s</td><td>—</td><td>전방 부채꼴의 모든 적을 쓸어버립니다.</td></tr>
+        <tr><td><b>회전베기</b></td><td>근접</td><td class="num">14</td><td class="num">0.9s</td><td>—</td><td>회전하며 주변 모든 적을 벱니다.</td></tr>
+        <tr><td><b>도약</b></td><td>근접</td><td class="num">12</td><td class="num">1.2s</td><td>—</td><td>커서로 도약해 착지하며 적을 강타합니다.</td></tr>
+        <tr><td><b>지면 강타</b></td><td>근접</td><td class="num">14</td><td class="num">1.4s</td><td>—</td><td>원뿔 범위 강타 — 피해, 넉백, 감속.</td></tr>
+        <tr><td><b>돌진</b></td><td>근접</td><td class="num">12</td><td class="num">1.6s</td><td>—</td><td>커서로 돌진하며 부딪힌 적에게 피해와 감속.</td></tr>
+        <tr><td><b>전투 함성</b></td><td>버프</td><td class="num">16</td><td class="num">9.0s</td><td>—</td><td>8초간: 근접 피해 증가, 받는 피해 감소.</td></tr>
+        <tr><td><b>다중 사격</b></td><td>원거리</td><td class="num">6</td><td class="num">0.45s</td><td style="color:var(--poison)">중독</td><td>독 바른 단검 세 자루를 부채꼴로.</td></tr>
+        <tr><td><b>일제 투척</b></td><td>원거리</td><td class="num">10</td><td class="num">0.7s</td><td style="color:#ff5b6b">출혈</td><td>다섯 자루의 단검이 출혈을 입힙니다.</td></tr>
+        <tr><td><b>칼날 부채</b></td><td>원거리</td><td class="num">16</td><td class="num">1.2s</td><td style="color:#ff5b6b">출혈</td><td>모든 방향으로 단검을 뿌립니다.</td></tr>
+        <tr><td><b>그림자 걸음</b></td><td>근접</td><td class="num">12</td><td class="num">1.1s</td><td>—</td><td>가장 가까운 적에게 순간이동해 <b>확정 치명타</b>로 칩니다.</td></tr>
+        <tr><td><b>점멸</b></td><td>기동</td><td class="num">8</td><td class="num">1.0s</td><td>—</td><td>커서 방향으로 짧게 순간이동.</td></tr>
+        <tr><td><b>순간이동 폭풍</b></td><td>기동</td><td class="num">18</td><td class="num">1.6s</td><td>—</td><td>커서로 점멸하며 <b>양쪽</b> 지점의 적을 폭발시킵니다 (번개).</td></tr>
+        <tr><td><b>화염구</b></td><td>화염</td><td class="num">8</td><td class="num">0.6s</td><td style="color:var(--fire)">화상</td><td>불의 구체를 날립니다.</td></tr>
+        <tr><td><b>서리</b></td><td>냉기</td><td class="num">12</td><td class="num">1.1s</td><td style="color:var(--frost)">냉각</td><td>감속을 거는 냉기 볼트.</td></tr>
+        <tr><td><b>서리 폭발</b></td><td>냉기</td><td class="num">16</td><td class="num">1.5s</td><td style="color:var(--frost)">냉각</td><td>빙결 폭발: 주변 적에게 피해와 감속.</td></tr>
+        <tr><td><b>노바</b></td><td>화염</td><td class="num">20</td><td class="num">2.6s</td><td style="color:var(--fire)">화상</td><td>모든 방향으로 화염 볼트의 고리.</td></tr>
+        <tr><td><b>연쇄 번개</b></td><td>번개</td><td class="num">18</td><td class="num">1.4s</td><td>—</td><td>적 사이를 튀는 볼트 (2 + 추가 도약).</td></tr>
+        <tr><td><b>운석</b></td><td>화염</td><td class="num">24</td><td class="num">2.4s</td><td style="color:var(--fire)">화상</td><td>커서에 운석 소환 — 강력한 화염 광역.</td></tr>
+        <tr><td><b>비전 구슬</b></td><td>화염</td><td class="num">16</td><td class="num">0.9s</td><td>—</td><td>느리고 무거운 구체가 최대 3명의 적을 관통.</td></tr>
+        <tr><td><b>눈보라</b></td><td>냉기</td><td class="num">26</td><td class="num">3.0s</td><td style="color:var(--frost)">냉각</td><td>몇 초간 얼음 폭풍.</td></tr>
+        <tr><td><b>재기의 숨결</b></td><td>회복</td><td class="num">0</td><td class="num">6.0s</td><td>—</td><td>마나를 <b>전부</b> 소모해 그 일부만큼 회복.</td></tr>
+      </tbody>
+    </table>
+    <h3 id="bar">액션 바 &amp; 장비 구성 <span class="pill">v49</span></h3>
+    <p>6개 슬롯, 스킬 창(<span class="kbd">K</span>)의 <b>어빌리티</b> 탭에서 배정합니다:</p>
+    <table>
+      <thead><tr><th>슬롯</th><th>발동</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td><b>1</b></td><td><span class="kbd">LMB</span></td><td><b>타격</b> — 기본 공격. 고정이며 바꿀 수 없습니다.</td></tr>
+        <tr><td><b>2</b></td><td><span class="kbd">RMB</span></td><td>해금한 어빌리티 아무거나. "선택된 스킬"이기도 해서 <b>액티브 스킬 피해</b> 옵션 보너스를 받고, RMB를 유지하면 반복 시전됩니다.</td></tr>
+        <tr><td><b>3–6</b></td><td><span class="kbd">1</span>–<span class="kbd">4</span></td><td>해금한 어빌리티 아무거나.</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">각 슬롯은 키, 아이콘, 마나 비용, 현재 등급(<code>R#</code>), 훑고 지나가는
+    재사용 대기 표시를 보여줍니다. <b>경험치 바와 레벨 배지</b>는 이제 액션 바 안에 있습니다.</p>
+
+    <h3 id="runes">룬 트리 <span class="pill">v49</span></h3>
+    <p>타격을 뺀 모든 액티브는 자기만의 작은 <b>룬 트리</b>를 가집니다 (총 21개). 해금과 같은
+    <b>어빌리티 포인트</b>를 여기에 쓰며, 트리는 <b>언제든 무료로 전액 환급</b>됩니다.
+    모든 트리는 <b>권능</b> 뿌리에서 자라는 같은 모양입니다:</p>
+    <table>
+      <thead><tr><th>노드</th><th>유형</th><th class="num">최대</th><th class="num">비용</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td><b>권능</b></td><td>하급 · 뿌리</td><td class="num">5</td><td class="num">1</td><td>등급당 스킬 피해 +7%.</td></tr>
+        <tr><td><b>가속</b></td><td>하급</td><td class="num">3</td><td class="num">1</td><td>등급당 재사용 대기 −5%.</td></tr>
+        <tr><td><b>집중</b></td><td>하급</td><td class="num">3</td><td class="num">1</td><td>등급당 마나 비용 −8%.</td></tr>
+        <tr><td><b>추가 볼트 / 전하 분열</b></td><td>하급</td><td class="num">2</td><td class="num">2</td><td>투사체 +1 / 연쇄 도약 +1 (다중 투사체 &amp; 연쇄 스킬 전용).</td></tr>
+        <tr><td><b>형태 ×3</b></td><td>주요 · 택1</td><td class="num">1</td><td class="num">2</td><td>상호 배타적인 세 가지 동작 (아래).</td></tr>
+        <tr><td><b>핵심</b></td><td>핵심</td><td class="num">1</td><td class="num">3</td><td>큰 마무리 하나 — 추적자 (유도, 피해 +15%), 숙련 (CD −20%, 피해 +20%), 파괴 (피해 +40%).</td></tr>
+      </tbody>
+    </table>
+    <p>노드 레벨 제한과 형태 선택지는 스킬의 <b>원형</b>(투사체, 다중 투사체, 연쇄, 범위, 유틸)에 따라
+    달라집니다. 배타적 형태 주요 노드는 스킬이 갈라지거나, 관통하거나, 적중 시 폭발하거나, 냉각시키거나,
+    밀쳐내거나, 메아리(한 번 더 시전)하거나, 지대를 남기는 등으로 바꿉니다. 예시:</p>
+    <ul class="clean">
+      <li><b>화염구</b> (투사체): 격발 (적중 시 폭발), 분열 (둘로 갈라짐), 꿰뚫기 (전부 관통) Lv 3;
+        핵심 <b>추적자</b> (유도, 피해 +15%) Lv 5.</li>
+      <li><b>연쇄 번개</b> (연쇄): 전하 분열 (+1 도약) Lv 8; 넓은 호, 메아리 타격 (두 번 시전),
+        과부하 (피해 +25%) Lv 10; 핵심 <b>파괴</b> (피해 +40%) Lv 12.</li>
+      <li><b>회전베기</b> (범위): 넓은 범위, 메아리 타격, 제압 (피해 +25%) Lv 7; 핵심
+        <b>파괴</b> (피해 +40%) Lv 9.</li>
+    </ul>
+    <p class="muted">배정은 숲과 같습니다: 이미 소유한 노드에 인접해야 하고 (모든 경로는 권능에 뿌리),
+    노드의 레벨 요구를 맞춰야 하며, 배타 그룹에서는 하나만 선택할 수 있습니다. 이 룬 레벨 제한은
+    어빌리티의 직업 해금 레벨과 별개입니다.</p>
+
+    <div class="note">속성이 붙은 스킬은 몬스터 저항과 상호작용합니다 (<a href="#monsters">몬스터</a> 참고).
+    <b>주문 메아리</b> 핵심(숲)과 <b>메아리 타격</b> 룬은 둘 다 스킬을 한 번 더 시전합니다.</div>
+  </section>
+
+  <!-- ============ FOREST ============ -->
+  <section id="forest">
+    <h2>스킬 숲 (패시브)</h2>
+    <p><span class="kbd">K</span>를 눌러 스킬 창을 열고 <b>패시브 숲</b> 탭으로 전환하세요
+    <span class="pill">v49</span> (옆 탭은 <a href="#skills">어빌리티</a>). 숲은 연결된 패시브 노드의
+    그물입니다: 직업의 시작 노드에서 출발해 레벨마다 <b>스킬 포인트 2개</b>(어빌리티 포인트와 별도 풀)를
+    써서 이미 소유한 노드에 인접한 노드를 배정합니다. 노드는 네 종류입니다:</p>
+    <table>
+      <thead><tr><th>노드</th><th>역할</th></tr></thead>
+      <tbody>
+        <tr><td><b>하급</b></td><td>작은 능력치 상승 (소량의 STR / VIT / DMG / 방어력 / 치명타 등).</td></tr>
+        <tr><td><b>주요</b></td><td>이름이 붙은 의미 있는 보너스 묶음.</td></tr>
+        <tr><td><b>핵심</b></td><td>빌드를 정의하는 힘. 종종 대가가 따릅니다.</td></tr>
+        <tr><td><b>시작</b></td><td>그물로 들어가는 직업별 진입점.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>세 구역</h3>
+    <p>트리는 힘, 민첩, 지능 날개로 뻗어 나갑니다. 각각 주요 노드와 구역 핵심 노드를 품고 있습니다:</p>
+    <table>
+      <thead><tr><th>구역</th><th>주요</th><th>핵심</th></tr></thead>
+      <tbody>
+        <tr><td><b>힘</b> (전사 시작)</td><td><b>전투 단련</b> — +14 STR, +8% 생명력, +8% 근접</td><td><b>저거너트</b> — +25% 방어력, +15% 생명력</td></tr>
+        <tr><td><b>민첩</b> (도적 시작)</td><td><b>정밀</b> — +14 DEX, +6 치명타</td><td><b>명사수</b> — +14 치명타, +1 관통</td></tr>
+        <tr><td><b>지능</b> (마법사 시작)</td><td><b>주문 직조자</b> — +14 ENG, +12% 주문, +20 마나</td><td><b>대마법사</b> — +1 모든 스킬, +20% 주문</td></tr>
+      </tbody>
+    </table>
+
+    <h3>외곽 핵심 &amp; 구역 간 주요 노드</h3>
+    <table>
+      <thead><tr><th>핵심</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td><b>티탄</b></td><td>+35% 생명력, +25% 방어력, −12% 이동 속도</td></tr>
+        <tr><td><b>피의 굶주림</b></td><td>+15% 생명력 흡수, +12% 근접</td></tr>
+        <tr><td><b>처형인</b></td><td>+12 치명타, 삼중 치명타 피해, +1 관통</td></tr>
+        <tr><td><b>템포</b></td><td>+30% 공격 속도 (가속), +15% 이동 속도</td></tr>
+        <tr><td><b>주문 메아리</b></td><td>주문을 한 번 더 시전, +12% 주문</td></tr>
+        <tr><td><b>유리 대포</b></td><td>+55% 피해, <b>−40% 생명력</b></td></tr>
+        <tr><td><b>연쇄 반응</b></td><td>죽음의 폭발 0.9 — 처치한 적이 당신 피해의 90%로 폭발</td></tr>
+        <tr><td><b>아이기스</b></td><td>마나 보호막 0.4 (피해의 40%를 마나로 흡수), +50 마나</td></tr>
+        <tr><td><b>동상</b></td><td>냉기 오라 (주변 적 감속), +8% 주문, +8 ENG</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">구역 간 주요 노드: <b>전쟁광</b> (+10% 근접 &amp; 주문, +4 치명타),
+    <b>교활한 자</b> (+10 DEX/ENG, +3 치명타), <b>보루</b> (+10 STR/VIT, +8 방어력).</p>
+    <div class="note warn">게임 데이터에는 이름 있는 등급 상승 패시브도 정의되어 있습니다 (강인함, 정밀함, 광기,
+    철피, 명상, 피의 갈망, 치명적 조준, 신속함, 관통 사격, 비전의 정신). v46에서 실제 패시브
+    시스템은 위의 숲이며, 그 이름 있는 패시브들은 숲을 통해 등급이 오르지 않습니다. 숲 노드와 핵심을
+    중심으로 빌드를 계획하세요.</div>
+  </section>
+
+  <!-- ============ EFFECTS ============ -->
+  <section id="effects">
+    <h2>특수 효과</h2>
+    <p>유니크 아이템, 세트 보너스, 숲 핵심에서 나옵니다. 모든 출처에서 중첩됩니다.</p>
+    <table>
+      <thead><tr><th>효과</th><th>하는 일</th></tr></thead>
+      <tbody>
+        <tr><td><b>생명력 / 마나 흡수</b></td><td>입힌 피해의 %만큼 생명력/마나 회복.</td></tr>
+        <tr><td><b>가시</b></td><td>근접 공격자에게 고정 피해 반사.</td></tr>
+        <tr><td><b>+모든 스킬</b></td><td>모든 스킬의 유효 등급 상승 (피해와 효과 증가).</td></tr>
+        <tr><td><b>삼중 치명타</b></td><td>치명타가 ×2 대신 <b>×3</b> 피해.</td></tr>
+        <tr><td><b>관통</b></td><td>물리/독 투사체가 적을 추가로 관통.</td></tr>
+        <tr><td><b>죽음의 폭발</b></td><td>처치한 적이 폭발해 주변 적에게 당신 피해의 %를 입힘.</td></tr>
+        <tr><td><b>마나 보호막</b></td><td>받는 피해의 일부를 생명력보다 마나로 먼저 흡수.</td></tr>
+        <tr><td><b>가속</b></td><td>공격 속도 증가 (공격 간격 단축).</td></tr>
+        <tr><td><b>냉기 오라</b></td><td>~14 유닛 안의 적을 계속 감속.</td></tr>
+        <tr><td><b>주문 메아리</b></td><td>주문형 스킬이 자동으로 한 번 더 시전됨.</td></tr>
+        <tr><td><b>이동 속도</b></td><td>더 빠른 이동 (총 이동 보너스 상한 +75%).</td></tr>
+        <tr><td><b>적중 시 화상 / 출혈</b></td><td>적중마다 해당 DoT를 걸 % 확률.</td></tr>
+        <tr><td><b>저항</b></td><td>받는 화염 / 냉기 / 독 / 번개 (또는 전체) 피해 감소, 각 상한 75%.</td></tr>
+        <tr><td><b>매직 파인드</b> <span class="pill">v49</span></td><td>더 높은 등급 드롭 확률 상승 (전리품 행운에 가산).</td></tr>
+        <tr><td><b>골드 파인드</b> <span class="pill">v49</span></td><td>몬스터가 떨구는 골드 배율.</td></tr>
+        <tr><td><b>회피</b> <span class="pill">v49</span></td><td>피해를 <b>0</b>으로 만들 확률 — 상한 60%.</td></tr>
+        <tr><td><b>피해 감소</b> <span class="pill">v49</span></td><td>방어력 다음에 적용되는 고정 % 피해 감소 — 상한 50%.</td></tr>
+        <tr><td><b>재사용 대기 감소</b> <span class="pill">v49</span></td><td>모든 스킬의 재사용 대기 단축 — 상한 50%.</td></tr>
+        <tr><td><b>적중 시 생명력</b> <span class="pill">v49</span></td><td>적중할 때마다 고정 생명력 회복.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ ITEMS ============ -->
+  <section id="items">
+    <h2>아이템 &amp; 등급</h2>
+    <h3>장비 슬롯 (7)</h3>
+    <p>⚔️ 무기 · 🪖 투구 · 🛡️ 갑옷 · 🧤 장갑 · 🥾 장화 · 💍 반지 · 📿 목걸이.
+    무기는 기본 피해를, 방어구는 기본 방어력을 주며, 반지와 목걸이는 <b>기본 능력치가 없습니다</b>
+    (힘은 전부 옵션과 효력에 있습니다).</p>
+    <p><span class="pill">v49</span> 아이템은 <a href="#smith">보석</a>을 박는 <b>소켓</b>이 붙을 수
+    있습니다 — 무기 &amp; 갑옷은 최대 <b>3</b>개, 투구 / 장갑 / 장화는 <b>2</b>개, 반지 &amp; 목걸이는
+    <b>1</b>개. 보석 보너스는 박힌 <em>슬롯</em>에 따라 달라집니다 (<a href="#smith">보석 &amp; 소켓</a> 참고).</p>
+
+    <h3>등급</h3>
+    <p>높은 등급은 아이템의 <b>기본 능력치와 모든 옵션 수치</b>를 배율하고 더 많은 옵션을 줍니다.</p>
+    <table>
+      <thead><tr><th>등급</th><th>위력 ×</th><th>옵션 수</th><th class="num">기본 드롭 %</th><th>강화 상한</th></tr></thead>
+      <tbody>
+        <tr><td><span class="swatch" style="background:#c8b89a"></span><b class="rc-common">일반</b></td><td class="num">1.00×</td><td>0</td><td class="num">40%</td><td class="num">+5</td></tr>
+        <tr><td><span class="swatch" style="background:#6a8ad8"></span><b class="rc-magic">마법</b></td><td class="num">1.18×</td><td>1–2</td><td class="num">33%</td><td class="num">+6</td></tr>
+        <tr><td><span class="swatch" style="background:#e0c84d"></span><b class="rc-rare">레어</b></td><td class="num">1.40×</td><td>3–5</td><td class="num">19%</td><td class="num">+8</td></tr>
+        <tr><td><span class="swatch" style="background:#5ad65a"></span><b class="rc-set">세트</b></td><td class="num">1.55×</td><td>2–3</td><td class="num">6%</td><td class="num">+8</td></tr>
+        <tr><td><span class="swatch" style="background:#d08a3a"></span><b class="rc-unique">유니크</b></td><td class="num">1.70×</td><td>고정</td><td class="num">2%</td><td class="num">+10</td></tr>
+      </tbody>
+    </table>
+    <div class="note">저 드롭 확률은 <strong>기본</strong> 판정입니다. <b>전리품 행운</b>(던전 깊이에 따라 상승,
+    층당 +2%, 최대 +50%)과 깊이 품질이 결과를 높은 등급 쪽으로 밀고, 많은 드롭이 여러 번 다시 굴려
+    가장 좋은 결과를 유지합니다. 그래서 디센트 깊은 곳에서 유니크는 표면의 2%보다 훨씬 흔합니다.</div>
+
+    <h3>기본 능력치 &amp; 아이템 레벨</h3>
+    <p>아이템의 위력은 드롭될 때 정해지는 <b>아이템 레벨 (ilvl)</b>에 따라 스케일됩니다:</p>
+    <div class="formula">무기 기본값   = round((4 + ilvl×1.3 + rand(0..4)) × 등급배율)
+방어구 기본값  = round((2 + ilvl×0.9 + rand(0..3)) × 등급배율)   (투구/갑옷/장갑/장화)
+반지 / 목걸이 = 기본 능력치 없음
+던전 드롭 ilvl = 내 레벨 + 깊이 × 2</div>
+  </section>
+
+  <!-- ============ AFFIXES ============ -->
+  <section id="affixes">
+    <h2>접두/접미 옵션</h2>
+    <p>옵션은 마법/레어/세트 장비에 붙는 무작위 수치입니다. 판정 범위는 아이템 레벨(<code>il</code>)에 따라
+    커지고, 이후 높은 등급이 판정값을 배율합니다. 표는 등급 배율 전의 원시 판정 범위입니다.</p>
+    <table>
+      <thead><tr><th>옵션</th><th>판정 범위</th></tr></thead>
+      <tbody>
+        <tr><td>피해</td><td><code>2 … 4 + il×1.1</code></td></tr>
+        <tr><td>생명력</td><td><code>8 … 18 + il×2</code></td></tr>
+        <tr><td>마나</td><td><code>5 … 10 + il×1.4</code></td></tr>
+        <tr><td>방어력</td><td><code>2 … 5 + il×1.2</code></td></tr>
+        <tr><td>힘 / 민첩 / 활력 / 에너지</td><td><code>1 … 2 + il×0.4</code></td></tr>
+        <tr><td>모든 속성</td><td><code>1 … 1 + il×0.25</code></td></tr>
+        <tr><td>치명타 확률 %</td><td><code>2 … 5</code></td></tr>
+        <tr><td>공격 속도 %</td><td><code>3 … 7</code></td></tr>
+        <tr><td>이동 속도 %</td><td><code>3 … 8</code></td></tr>
+        <tr><td>치명타 피해 %</td><td><code>8 … 15 + il×1.0</code></td></tr>
+        <tr><td>생명력 흡수 %</td><td><code>1 … 3</code></td></tr>
+        <tr><td>마나 흡수 %</td><td><code>1 … 3</code></td></tr>
+        <tr><td>생명력 &amp; 마나 흡수 %</td><td><code>1 … 2</code> (둘 다)</td></tr>
+        <tr><td>가시</td><td><code>2 … 5 + il×0.6</code></td></tr>
+        <tr><td>화염 / 냉기 / 독 / 번개 저항 %</td><td><code>4 … 9 + il×0.4</code></td></tr>
+        <tr><td>모든 저항 %</td><td><code>2 … 4 + il×0.25</code></td></tr>
+        <tr><td>적중 시 화상 %</td><td><code>8 … 16 + il×0.3</code></td></tr>
+        <tr><td>적중 시 출혈 %</td><td><code>8 … 16 + il×0.3</code></td></tr>
+        <tr><td>+ 스킬 <span class="pill">v46</span></td><td><code>1 … 1 + il×0.08</code></td></tr>
+        <tr><td>스킬 피해 % <span class="pill">v46</span></td><td><code>5 … 9 + il×0.3</code></td></tr>
+        <tr><td>액티브 스킬 피해 % <span class="pill">v46</span></td><td><code>8 … 14 + il×0.4</code></td></tr>
+        <tr><td>화염 / 냉기 / 번개 / 독 피해 % <span class="pill">v46</span></td><td><code>6 … 12 + il×0.4</code></td></tr>
+        <tr><td>생명력 재생 /초 <span class="pill">v46</span></td><td><code>2 … 4 + il×0.5</code></td></tr>
+        <tr><td>마나 재생 /초 <span class="pill">v46</span></td><td><code>1 … 2 + il×0.4</code></td></tr>
+        <tr><td>매직 파인드 % <span class="pill">v49</span></td><td><code>5 … 10 + il×0.3</code></td></tr>
+        <tr><td>골드 파인드 % <span class="pill">v49</span></td><td><code>6 … 12 + il×0.4</code></td></tr>
+        <tr><td>회피 % <span class="pill">v49</span></td><td><code>2 … 4 + il×0.15</code></td></tr>
+        <tr><td>피해 감소 % <span class="pill">v49</span></td><td><code>2 … 4 + il×0.15</code></td></tr>
+        <tr><td>재사용 대기 감소 % <span class="pill">v49</span></td><td><code>3 … 6 + il×0.2</code></td></tr>
+        <tr><td>적중 시 생명력 <span class="pill">v49</span></td><td><code>2 … 4 + il×0.5</code></td></tr>
+      </tbody>
+    </table>
+    <div class="note"><strong>v46</strong> 옵션은 장비가 빌드를 직접 강화하게 합니다:
+    <b>+ 스킬</b>은 모든 스킬의 유효 등급을 올리고 (패시브 스케일링에도 반영), <b>스킬 피해 %</b>는
+    모든 액티브 스킬 타격을 강화하고, <b>액티브 스킬 피해 %</b>는 현재 바에 선택된 스킬에 추가 보너스를
+    주며, 네 가지 <b>속성 피해 %</b> 옵션은 해당 속성의 모든 피해를 배율합니다 (기본 근접은 의도적으로
+    스킬 피해 강화 대상에서 제외). 아무 아이템에나 붙거나, 원하는 <a href="#smith">마법부여</a>로 추가할 수 있습니다.</div>
+    <div class="note"><span class="pill">v49</span> 최신 옵션은 <b>방어 &amp; 유틸</b> 계열입니다:
+    <b>회피</b>, <b>피해 감소</b>, <b>재사용 대기 감소</b> (상한 60% / 50% / 50%)와
+    <b>매직 파인드</b>, <b>골드 파인드</b>, <b>적중 시 생명력</b>. 장비에 붙거나, 원하는
+    <a href="#smith">마법부여</a>로 추가하거나, 소켓에 박은 <a href="#smith">보석</a>으로 얻을 수 있습니다.</div>
+  </section>
+
+  <!-- ============ UNIQUES ============ -->
+  <section id="uniques">
+    <h2>유니크 아이템</h2>
+    <p>유니크(<span class="rc-unique">✦</span>)는 수작업으로 조정된 옵션과 고유 효과를 가집니다. 기본
+    능력치는 ilvl에 따라 조금 스케일됩니다. 총 16개:</p>
+    <table>
+      <thead><tr><th>이름</th><th>슬롯</th><th>옵션</th><th>고유 효과</th></tr></thead>
+      <tbody>
+        <tr><td class="rc-unique"><b>핏빛 송곳니</b></td><td>무기</td><td>+12 피해, +8 치명타</td><td>근접/주문 피해의 12% 회복.</td></tr>
+        <tr><td class="rc-unique"><b>세계를 가르는 자</b></td><td>무기</td><td>+14 피해, +8 STR</td><td>공격이 적 2명을 추가로 관통.</td></tr>
+        <tr><td class="rc-unique"><b>폭풍소환사</b></td><td>무기</td><td>+10 피해, +8 공격 속도</td><td>+15% 공격 속도.</td></tr>
+        <tr><td class="rc-unique"><b>가시 갑주</b></td><td>갑옷</td><td>+18 방어력, +10 VIT</td><td>근접 공격자에게 14 피해 반사.</td></tr>
+        <tr><td class="rc-unique"><b>영원한 아이기스</b></td><td>갑옷</td><td>+20 방어력, +12 모든 저항, +12 VIT</td><td>근접 공격자에게 12 피해 반사.</td></tr>
+        <tr><td class="rc-unique"><b>대마법사의 관</b></td><td>투구</td><td>+12 ENG, +30 마나</td><td>모든 스킬 등급 +1.</td></tr>
+        <tr><td class="rc-unique"><b>악의의 얼굴</b></td><td>투구</td><td>+8 VIT, +8 방어력</td><td>근접 공격자에게 18 피해 반사.</td></tr>
+        <tr><td class="rc-unique"><b>파멸의 왕관</b></td><td>투구</td><td>+10 ENG, +30 치명타 피해</td><td>치명타가 3× 피해.</td></tr>
+        <tr><td class="rc-unique"><b>분노의 건틀릿</b></td><td>장갑</td><td>+10 피해, +8 STR</td><td>피해의 5% 회복.</td></tr>
+        <tr><td class="rc-unique"><b>탐욕의 손아귀</b></td><td>장갑</td><td>+8 피해, +2 생명력&amp;마나 흡수</td><td>피해의 6% 회복.</td></tr>
+        <tr><td class="rc-unique"><b>바람걸음 각반</b></td><td>장화</td><td>+10 DEX</td><td>+25% 이동 속도.</td></tr>
+        <tr><td class="rc-unique"><b>유령 장화</b></td><td>장화</td><td>+8 DEX, +10 이동 속도</td><td>+20% 이동 속도.</td></tr>
+        <tr><td class="rc-unique"><b>사신의 눈</b></td><td>목걸이</td><td>+10 치명타, +8 피해</td><td>치명타가 3× 피해.</td></tr>
+        <tr><td class="rc-unique"><b>산의 심장</b></td><td>목걸이</td><td>+14 VIT, +10 모든 저항</td><td>근접 공격자에게 16 피해 반사.</td></tr>
+        <tr><td class="rc-unique"><b>흡혈의 고리</b></td><td>반지</td><td>+20 생명력, +4 피해</td><td>피해의 6% 회복.</td></tr>
+        <tr><td class="rc-unique"><b>잿불 고리</b></td><td>반지</td><td>+6 피해, +6 치명타</td><td>처치한 적이 당신 피해의 50%로 폭발.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ SETS ============ -->
+  <section id="sets">
+    <h2>세트 아이템</h2>
+    <p>세트 부위(<span class="rc-set">녹색</span>)는 같은 세트를 더 많이 장착할수록 커지는 보너스를 줍니다.
+    각 세트는 4부위; 모두 모아 최대 보상을 노리세요.</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h4 class="rc-set">감시자의 경계</h4>
+        <p class="muted">투구 · 갑옷 · 장갑 · 장화</p>
+        <ul class="clean">
+          <li><b>2부위:</b> +15 VIT, +12 방어력</li>
+          <li><b>3부위:</b> +12 STR, +40 생명력</li>
+          <li><b>4부위:</b> +30 VIT, +30 방어력, 가시 12</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="rc-set">소환술사의 예복</h4>
+        <p class="muted">투구 · 갑옷 · 목걸이 · 반지</p>
+        <ul class="clean">
+          <li><b>2부위:</b> +18 ENG, +30 마나</li>
+          <li><b>3부위:</b> +30 ENG</li>
+          <li><b>4부위:</b> +60 마나, +1 모든 스킬</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="rc-set">그림자 무희</h4>
+        <p class="muted">무기 · 장갑 · 장화 · 반지</p>
+        <ul class="clean">
+          <li><b>2부위:</b> +15 DEX, +6 치명타</li>
+          <li><b>3부위:</b> +14 피해</li>
+          <li><b>4부위:</b> +12 치명타, 삼중 치명타 피해</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="rc-set">잿불 걸음꾼</h4>
+        <p class="muted">무기 · 투구 · 장갑 · 장화</p>
+        <ul class="clean">
+          <li><b>2부위:</b> +8 공격 속도, +5 치명타</li>
+          <li><b>3부위:</b> +16 피해</li>
+          <li><b>4부위:</b> +25% 적중 시 화상, +12% 가속</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SMITH ============ -->
+  <section id="smith">
+    <h2>강화, 마법부여 &amp; 보석</h2>
+    <p>마을 장인들이 장비, 보석, 포션을 다룹니다. <b>대장장이</b>와 <b>연금술사</b>는 모든 마을에,
+    <b>마법부여사</b>는 주요 마을에, <b>보석상</b>은 엠버홀드 전용입니다. 제작에는 두 재화가 듭니다 —
+    <b>골드</b>와 <span class="pill">v49</span> <b>가루 ✦</b>.</p>
+    <div class="note"><span class="pill">v49</span> <b>가루 ✦</b>는 아이템을 <b>분해</b>해서 얻는 제작
+    재료입니다 (잡템 일괄 판매로도 획득). 아이템의 가루 가치는 등급이 정합니다 — 일반 <b>1</b> · 마법 <b>3</b> ·
+    레어 <b>8</b> · 세트 <b>15</b> · 유니크 <b>25</b> — 가루는 재련과 소켓 추가 비용으로 쓰입니다.</div>
+
+    <h3>대장장이 — 강화 · 재련 · 분해 · 소켓 <span class="pill">v49</span></h3>
+    <p>대장장이는 이제 <b>네 개의 탭</b>에서 일합니다 (예전 포션 강화는 v47에서 연금술사로 이전):</p>
+    <table>
+      <thead><tr><th>탭</th><th>하는 일</th><th>비용</th></tr></thead>
+      <tbody>
+        <tr><td><b>강화</b></td><td>레벨당 아이템의 <em>모든</em> 능력치 +8%, 등급 상한까지 (일반 +5 … 유니크 +10).</td><td><code>round(itemScore × (1+level) × 0.5) + 15</code> 골드</td></tr>
+        <tr><td><b>재련</b></td><td>아이템의 기본 능력치와 <em>전체</em> 옵션 세트를 다시 굴리고 이름도 바꿉니다. 먼저 <b>15% 확률로 등급을 한 단계 올립니다</b> (레어까지). 일반 / 마법 / 레어만 — 세트 &amp; 유니크는 수작업이라 제외.</td><td><code>4 + rarityTier×4</code> 가루 + <code>round(itemScore×0.15)+15</code> 골드</td></tr>
+        <tr><td><b>분해</b></td><td>인벤토리 아이템을 <b>가루</b>로 분해 (골드 없음). 장착 장비는 분해 불가; 레어 이상은 확인을 묻습니다.</td><td>— (<code>dustValue</code> 획득)</td></tr>
+        <tr><td><b>소켓</b></td><td>빈 소켓 하나 추가, 슬롯 최대치까지 (무기/갑옷 3, 투구/장갑/장화 2, 반지/목걸이 1).</td><td><code>6 + rarityTier×4</code> 가루 + <code>round(itemScore×0.2)+20</code> 골드</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">등급별 재련 가루 비용: 일반 8 · 마법 12 · 레어 16. 대장장이의 예전 무작위 단일 옵션
+    재판정은 v46에서 제거됐습니다 — 원하는 옵션 부여는 아래 마법부여사가 담당합니다.</p>
+
+    <h3 id="gems">보석 &amp; 소켓 <span class="pill">v49</span></h3>
+    <p>보석은 몬스터 — 특히 <a href="#elites">챔피언 &amp; 보물 고블린</a> — 에게서 보석 주머니로 드롭되고,
+    아이템 소켓에 박습니다. 보석 보너스는 <b>슬롯 의존적</b>입니다: 같은 보석이라도 무기에서는 하나,
+    방어구에서는 다른, 장신구에서는 또 다른 능력치를 줍니다.</p>
+    <table>
+      <thead><tr><th>보석</th><th>무기에</th><th>방어구에</th><th>반지 / 목걸이에</th></tr></thead>
+      <tbody>
+        <tr><td><b>루비</b></td><td>화염 피해 %</td><td>생명력</td><td>힘</td></tr>
+        <tr><td><b>사파이어</b></td><td>냉기 피해 %</td><td>마나</td><td>모든 저항</td></tr>
+        <tr><td><b>토파즈</b></td><td>번개 피해 %</td><td>번개 저항</td><td>에너지</td></tr>
+        <tr><td><b>에메랄드</b></td><td>독 피해 %</td><td>민첩</td><td>독 저항</td></tr>
+        <tr><td><b>자수정</b></td><td>피해</td><td>방어력</td><td>활력</td></tr>
+        <tr><td><b>다이아몬드</b></td><td>치명타 피해 %</td><td>모든 저항</td><td>치명타 확률 %</td></tr>
+        <tr><td><b>오닉스</b></td><td>치명타 확률 %</td><td>가시</td><td>치명타 피해 %</td></tr>
+      </tbody>
+    </table>
+    <p>"방어구"는 투구, 갑옷, 장갑, 장화를 포함합니다. 각 보석은 <b>다섯 품질 단계</b> — 깨진 → 금이 간 →
+    (일반) → 완벽한 → 최상급 — 가 있고 보너스는 품질에 따라 커집니다. 보석 보너스는 <b>고정값</b>입니다
+    (아이템 강화 레벨로 배율되지 않습니다).</p>
+    <ul class="clean">
+      <li><b>보기</b> — 가진 모든 보석과 슬롯별 능력치를 인벤토리의 <b>보석</b> 탭에서 확인. 보석은 무제한으로 쌓이고 소지품 공간을 차지하지 않습니다.</li>
+      <li><b>소켓 얻기</b> — 대장장이 (소켓 탭)에서 추가하거나 드롭으로 붙습니다.</li>
+      <li><b>장착 / 제거</b> — 보석상에서. 뺀 보석은 주머니로 돌아갑니다.</li>
+      <li><b>합성</b> — 보석상에서 같은 품질 세 개를 다음 단계 하나로 (최상급까지).</li>
+    </ul>
+
+    <h3>연금술사 — 포션 <span class="pill">v47</span></h3>
+    <p><b>모든 마을</b>의 새로운 ⚗️ NPC로, 포션을 영구적으로 개선합니다 (이 강화는 예전에 대장장이에게
+    있었습니다). 포션 보충은 여전히 <a href="#economy">가마솥</a>에서 무료입니다.</p>
+    <table>
+      <thead><tr><th>강화</th><th>효과</th><th>비용</th><th>상한</th></tr></thead>
+      <tbody>
+        <tr><td><b>포션 위력</b></td><td>단계당 최대치의 +5% 회복 (기본 40%)</td>
+          <td><code>200 × 2^단계</code></td><td>8단계 (→ 80%)</td></tr>
+        <tr><td><b>포션 소지량</b></td><td>각 종류 소지 수 +2 (기본 10)</td>
+          <td><code>150 + (cap−10) × 40</code></td><td>각 30개</td></tr>
+      </tbody>
+    </table>
+
+    <h3>마법부여사 — 선택 부여 <span class="pill">v46</span></h3>
+    <p><b>아무</b> 아이템이나 고르고, 넓은 풀에서 <b>원하는 능력치 하나</b>를 골라 부여합니다 (피해, 생명력,
+    속성, 치명타, 치명타 피해, 흡수, 저항, 새 스킬/속성/재생 옵션 등). 부여는 아이템의 추가 수식어
+    하나로 저장되며 (<span class="rc-unique">✦</span> 표시), 다시 부여하면 <b>덮어씁니다</b> — 아이템은
+    항상 하나의 선택 부여만 가집니다.</p>
+    <div class="formula">마법부여 비용 = round(itemScore × 0.35) + 25</div>
+    <p class="muted">선택 부여는 아이템의 판매/구매 가격 계산에서 의도적으로 제외되므로, 재부여가
+    가격을 부풀리지 않습니다.</p>
+
+    <h3>보석상 — 장신구 &amp; 보석 <span class="pill">v46</span></h3>
+    <p>엠버홀드 전용. 보석상은 새 반지 &amp; 목걸이를 팔고, 가진 반지나 목걸이의 <b>모든 옵션을 한꺼번에
+    다시 굴려줍니다</b> (모든 기존 옵션의 수치를 새로 판정). 비용 공식은 마법부여와 같습니다:</p>
+    <div class="formula">재판정 비용 = round(itemScore × 0.35) + 25</div>
+    <p><span class="pill">v49</span> 보석상은 <b>보석 작업대</b>이기도 합니다: 소켓에 보석 <b>장착</b>,
+    주머니로 <b>제거</b>, 같은 품질 세 개를 다음 단계 하나로 <b>합성</b>.</p>
+
+    <p class="muted">"itemScore"는 기본 능력치, 각 옵션, 특수 효과(+40), 세트 여부(+15)를 강화 레벨로
+    스케일해 매긴 점수 — 판매/구매 가격도 이것으로 결정됩니다.</p>
+  </section>
+
+  <!-- ============ ECONOMY ============ -->
+  <section id="economy">
+    <h2>경제 &amp; 마을 시설</h2>
+    <h3>골드 &amp; 가루</h3>
+    <p>골드는 몬스터가 떨굽니다 (엘리트와 보스, 더 깊은 층에서 더 많이). 상인 (장비 구매 &amp; 판매),
+    대장장이 (강화, 재련, 소켓), 연금술사 (포션 강화), 마법부여사 / 보석상, 도박사에서 씁니다.
+    <span class="pill">v47</span> 상인은 더 이상 포션을 팔지 않습니다 — 가마솥에서 무료 보충하세요.</p>
+    <p><span class="pill">v49</span> <b>가루 ✦</b>는 제작 재화로, 대장장이에서 장비를 <b>분해</b>하거나
+    잡템 일괄 판매로 얻습니다. 골드와 함께 <a href="#smith">재련</a>과 <a href="#smith">소켓</a> 추가
+    비용으로 쓰이며, 등급별 가루 가치는 <a href="#smith">제작</a> 항목에 있습니다.</p>
+
+    <h3>상인</h3>
+    <table>
+      <thead><tr><th>행동</th><th>가격</th></tr></thead>
+      <tbody>
+        <tr><td>아이템 판매</td><td><code>max(2, round(itemScore × 0.5))</code> g</td></tr>
+        <tr><td>아이템 구매</td><td><code>round(sellValue × 3) + 8</code> g</td></tr>
+        <tr><td>상품 재입고</td><td><code>40 + Level × 8</code> g (판매 중인 6개 아이템 재판정)</td></tr>
+        <tr><td>잡템 판매</td><td>가방의 모든 일반 &amp; 마법 아이템을 일괄 판매 — 골드 <b>+ 가루 ✦</b> 획득. <span class="pill">v49</span></td></tr>
+        <tr><td>전부 판매</td><td>소지품 전체를 골드 <b>+ 가루 ✦</b>로 판매 — <b>확인을 묻습니다</b> (레어/세트/유니크 포함). <span class="pill">v49</span></td></tr>
+      </tbody>
+    </table>
+    <p class="muted">상인은 마을에 들어올 때마다 내 레벨 근처의 6개 상품을 새로 채웁니다.</p>
+
+    <h3>마을 시설 &amp; 위치 <span class="pill">v46</span></h3>
+    <p>마을마다 NPC 구성이 다릅니다. 시작 마을은 기본 시설을, 해금 가능한
+    <a href="#zones">엠버홀드</a>는 보석상과 고급 상인을 포함한 전 구성을 갖춥니다.</p>
+    <table>
+      <thead><tr><th>시설</th><th>하는 일</th><th>위치</th></tr></thead>
+      <tbody>
+        <tr><td><b>상인</b></td><td>장비 구매 &amp; 판매; 재입고; 잡템 판매 / 전부 판매. <span class="pill">v47</span> 포션은 더 이상 팔지 않음.</td><td>모든 마을</td></tr>
+        <tr><td><b>대장장이</b> <span class="pill">v49</span></td><td>강화 · 재련 · 분해 (→ 가루) · 소켓 추가.</td><td>모든 마을</td></tr>
+        <tr><td><b>연금술사</b> <span class="pill">v47</span></td><td>포션 위력 &amp; 소지량 개선.</td><td>모든 마을</td></tr>
+        <tr><td><b>창고</b></td><td>공용 보관함 (80칸, 8열 그리드) + 칸 구매 옵션.</td><td>모든 마을</td></tr>
+        <tr><td><b>가마솥</b></td><td>HP와 마나를 완전 회복하고 두 종류 포션을 보충 — 무료.</td><td>모든 마을</td></tr>
+        <tr><td><b>웨이포인트</b></td><td>해금된 지역 간 빠른 이동 (<span class="kbd">G</span>).</td><td>모든 마을</td></tr>
+        <tr><td><b>마법부여사</b></td><td>아무 아이템에 원하는 능력치 하나 부여 (덮어씀).</td><td>알더미어, 하이리치, 엠버홀드</td></tr>
+        <tr><td><b>도박사</b></td><td>내 레벨 근처의 미감정 무작위 아이템 구매 (어떤 등급도 가능).</td><td>하이리치, 엠버홀드</td></tr>
+        <tr><td><b>보석상</b> <span class="pill">v49</span></td><td>반지 &amp; 목걸이 판매; 장신구 옵션 재판정; 보석 장착 / 제거 / 합성.</td><td>엠버홀드</td></tr>
+        <tr><td><b>고급 상인</b></td><td>상급 상품: 더 높은 아이템 레벨과 강화된 품질.</td><td>엠버홀드</td></tr>
+      </tbody>
+    </table>
+
+    <h4>도박사</h4>
+    <p>골드를 내고 깜짝 아이템을 받습니다 — 사기 전까지는 알 수 없습니다. 아이템 레벨과 확률은
+    상위 마을에서 좋아집니다:</p>
+    <div class="formula">도박 비용 = 50 + Level × 15 + townTier × 150
+도박 ilvl = Level + 1 + townTier × 2 ,  품질 = 0.10 + townTier × 0.12</div>
+
+    <h3>전리품 필터 <span class="pill">v46</span></h3>
+    <p><b>설정 → 전리품</b>에서 설정. 신경 쓸 등급과 슬롯, 최소 아이템 레벨을 고릅니다. 필터를
+    <em>통과하지 못한</em> 것은 <b>밟는 순간 자동 분해</b>됩니다 — 판매가만큼의 <b>골드</b>
+    <span class="pill">v49</span> <b>+ 가루 ✦</b>로 전환되며, 파괴되지도 가방을 어지럽히지도 않습니다.</p>
+    <ul class="clean">
+      <li>체크 안 한 <b>등급</b>이나 <b>슬롯</b> → 주울 때 골드 + 가루로 분해.</li>
+      <li><b>최소</b> 아이템 레벨 미만 → 분해… 단 <b class="rc-set">세트</b>와
+        <b class="rc-unique">유니크</b>는 항상 최소 레벨 규칙을 무시해 절대 잃지 않습니다.</li>
+      <li>골드, 포션, <b>보석</b>은 필터와 무관하게 항상 주웁니다.</li>
+    </ul>
+
+    <h3>포션</h3>
+    <div class="formula">회복량 = round(maxHP-or-maxMP × (40% + potionTier × 5%))</div>
+    <ul class="clean">
+      <li>생명력 포션은 <b>DoT 하나도 정화</b>합니다 (화상 / 출혈 / 중독).</li>
+      <li>마을 <b>가마솥</b>은 <b>HP 완전 회복, 마나 회복, 두 포션 보충</b> — <b>무료</b>.</li>
+      <li>각 종류 최대 <code>potionCap</code>개 소지 (기본 10, 연금술사로 30까지).</li>
+      <li>포션과 골드는 몬스터가 직접 떨구기도 합니다.</li>
+    </ul>
+  </section>
+
+  <!-- ============ ZONES ============ -->
+  <section id="zones">
+    <h2>지역 &amp; 이동</h2>
+    <p><span class="pill">v49</span> 야생은 <b>세 개의 분리된 포털 연결 바이옴 지도</b>입니다 — 더 이상 하나의
+    오픈 월드가 아닙니다. 각각 포털로 들어가는 독립된 경계 구역이며, 바이옴 안에서 <b>다음</b> 또는
+    <b>이전</b> 바이옴으로, 인접한 <b>마을</b>로, <b>동굴</b>을 통해 끝없는 던전으로 내려가거나,
+    <b>웨이포인트</b>(빠른 이동, <span class="kbd">G</span>)를 열 수 있습니다. 마을은 한 번 이상
+    <b>직접 도착해야</b> 웨이포인트 연결망에 추가됩니다.</p>
+
+    <h3>야생 바이옴 <span class="pill">v49</span></h3>
+    <p>각 바이옴은 입장할 때마다 새로 생성되고 (반경 ~150) 하나의 마을과 짝을 이룹니다. 사슬을 이룹니다 —
+    그린와일드 → 프로스트펜 → 애쉬랜드 — 바이옴의 레벨이 그곳 몬스터의 난이도를 정합니다.</p>
+    <table>
+      <thead><tr><th>바이옴</th><th class="num">레벨</th><th>인접 마을</th><th>포털 연결</th></tr></thead>
+      <tbody>
+        <tr><td><b>그린와일드</b></td><td class="num">1</td><td>알더미어</td><td>→ 프로스트펜</td></tr>
+        <tr><td><b>프로스트펜</b></td><td class="num">7</td><td>하이리치</td><td>← 그린와일드 · → 애쉬랜드</td></tr>
+        <tr><td><b>애쉬랜드</b></td><td class="num">14</td><td>엠버홀드</td><td>← 프로스트펜</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><span class="pill">v49</span> 프로스트펜 → 애쉬랜드 포털은 <b>잠겨 있습니다</b>:
+    디센트에서 <b>깊이 10</b>에 도달해야 열립니다 (그 전까지는 내려가서 애쉬랜드를 돌파하라고 안내).
+    그린와일드 ↔ 프로스트펜은 항상 열려 있고, 뒤로 가는 포털은 절대 잠기지 않습니다.</div>
+
+    <h3>마을 &amp; 던전</h3>
+    <table>
+      <thead><tr><th>지역</th><th>유형</th><th>가는 방법</th></tr></thead>
+      <tbody>
+        <tr><td><b>알더미어</b></td><td>마을 (티어 0)</td><td>홈 허브, 그린와일드와 짝. 상인, 대장장이, 연금술사, 창고, 가마솥, 웨이포인트. <b>처음부터 알고 있음.</b></td></tr>
+        <tr><td><b>하이리치</b></td><td>마을 (티어 1)</td><td><b>프로스트펜</b>과 짝. 도박사 &amp; 고급 상품 추가.</td></tr>
+        <tr><td><b>엠버홀드</b></td><td>마을 (티어 2)</td><td><b>애쉬랜드</b>와 짝 — 도착하려면 먼저 깊이 10 관문을 돌파해야 합니다. 보석상 &amp; 고급 상인 포함 전 NPC 구성.</td></tr>
+        <tr><td><b>디센트</b></td><td>던전</td><td>아무 야생 바이옴의 동굴 포털. <span class="pill">v49</span> 직사각형 KayKit <b>돌 전당</b> (더 이상 원형 아레나가 아님). 끝없음; 깊이는 무한 스케일; 5층마다 보스.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>마을 찾기 &amp; 빠른 이동</h3>
+    <ul class="clean">
+      <li>마을 포털로 들어가면 그 마을로 이동하며 <b>발견</b>됩니다. 발견된 마을은 웨이포인트 연결망에 나타나 즉시 빠른 이동이 가능하고, 미발견 마을은 찾을 때까지 <em>"— 미발견"</em>으로 표시됩니다.</li>
+      <li>바이옴에 들어가면 인접 마을이 자동 발견되므로, 바이옴 사슬이 자연스럽게 마을 사슬을 드러냅니다.</li>
+      <li><b>깊이 선택기</b> <span class="pill">v47</span>: 웨이포인트에서 <em>이미 도달한 던전 깊이 어디든</em> (1 … 최고 기록) 바로 갈 수 있습니다. 깊이 1이나 최고 체크포인트만이 아닙니다.</li>
+    </ul>
+    <div class="note">마을과 야생 바이옴은 원형 구역에 가둡니다 (마을 반경 48, 야생 반경 150);
+    던전은 축 정렬 벽 제한이 있는 직사각형 돌 전당 (반경 80)입니다.</div>
+  </section>
+
+  <!-- ============ DIFFICULTY ============ -->
+  <section id="difficulty">
+    <h2>난이도 &amp; 스케일링</h2>
+    <h3>난이도 등급 <span class="pill">v50</span></h3>
+    <p>HUD나 설정에서 바꿉니다. 등급은 배율뿐 아니라 <b>메커니즘</b>을 바꾸고, <b>획득해야</b> 합니다:
+    영웅이 요구 디센트 깊이에 도달해야 해금됩니다 (메인 메뉴에서는 가장 깊이 간 저장 영웅 기준).
+    현재 등급을 획득하지 못한 영웅을 불러오면 난이도가 낮아집니다.</p>
+    <table>
+      <thead><tr><th>난이도</th><th class="num">HP ×</th><th class="num">피해 ×</th><th class="num">XP ×</th><th class="num">엘리트 옵션</th><th class="num">스폰 밀도</th><th class="num">추가 저항</th><th class="num">해금 깊이</th></tr></thead>
+      <tbody>
+        <tr><td><b>일반</b></td><td class="num">1.0</td><td class="num">1.0</td><td class="num">1.0</td><td class="num">1</td><td class="num">×1.0</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td><b>어려움</b></td><td class="num">1.6</td><td class="num">1.4</td><td class="num">1.3</td><td class="num">1</td><td class="num">×1.15</td><td class="num">+5%</td><td class="num">8</td></tr>
+        <tr><td><b>지옥</b></td><td class="num">2.6</td><td class="num">2.0</td><td class="num">1.8</td><td class="num">2</td><td class="num">×1.3</td><td class="num">+10%</td><td class="num">20</td></tr>
+        <tr><td><b>인페르노</b></td><td class="num">4.0</td><td class="num">3.0</td><td class="num">2.5</td><td class="num">3</td><td class="num">×1.5</td><td class="num">+15%</td><td class="num">35</td></tr>
+      </tbody>
+    </table>
+
+    <h3>깊이 스케일링 (던전)</h3>
+    <p>난이도 위에, 던전 층은 깊이 <code>d</code>에 따라 강해집니다 (초반 층은 거의 선형, 후반 층은 급격히 상승):</p>
+    <div class="formula">HP  ×= 1 + d×0.40 + (d×0.05)²
+DMG ×= 1 + d×0.28 + (d×0.04)²
+XP  ×= 1 + d×0.50 + (d×0.04)²
+드롭 ilvl = Level + d×2 ,  전리품 행운 = min(50%, d×2%)</div>
+
+    <h3>야생 스케일링</h3>
+    <div class="formula">HP ×= 1 + regionLevel×0.12 ,  DMG ×= 1 + regionLevel×0.09 ,  XP ×= 1 + regionLevel×0.15</div>
+    <p class="muted"><span class="pill">v49</span> <code>regionLevel</code>은 현재 바이옴 지도의 레벨 —
+    <b>1</b> (그린와일드), <b>7</b> (프로스트펜), <b>14</b> (애쉬랜드) — 입장 시 고정되므로, 바이옴 사슬을
+    깊이 갈수록 몬스터가 더 아프게 때립니다.</p>
+    <p class="muted">적 저항도 깊이에 따라 <b>깊어집니다</b> (기존 저항이 강해지되, 완전 면역이 되지 않도록
+    하한 적용); 약점은 그대로입니다.</p>
+  </section>
+
+  <!-- ============ MONSTERS ============ -->
+  <section id="monsters">
+    <h2>몬스터</h2>
+    <p>여덟 가지 기본 원형이 야생과 던전에 스폰됩니다 (능력치는 이후 난이도와 깊이로 스케일). 저항
+    <b>&lt;1×</b>는 그 피해를 <em>덜</em> 받고, <b>&gt;1×</b>는 <em>더</em> 받습니다 (약점).</p>
+    <table>
+      <thead><tr><th>몬스터</th><th class="num">HP</th><th class="num">피해</th><th class="num">속도</th><th class="num">XP</th><th>저항 / 약점</th></tr></thead>
+      <tbody>
+        <tr><td><b>타락자</b></td><td class="num">18</td><td class="num">5</td><td class="num">빠름</td><td class="num">6</td><td>화염 ×0.5 · 냉기 ×1.25</td></tr>
+        <tr><td><b>좀비</b></td><td class="num">30</td><td class="num">6</td><td class="num">느림</td><td class="num">8</td><td>독 ×0.5 · 화염 ×1.25</td></tr>
+        <tr><td><b>주술사</b> (원거리)</td><td class="num">42</td><td class="num">10</td><td class="num">보통</td><td class="num">15</td><td>냉기 ×0.5 · 번개 ×1.25</td></tr>
+        <tr><td><b>거한</b></td><td class="num">95</td><td class="num">14</td><td class="num">느림</td><td class="num">22</td><td>화염 ×0.5 · 냉기 ×1.25</td></tr>
+        <tr><td><b>해골</b> <span class="pill">v47</span></td><td class="num">26</td><td class="num">8</td><td class="num">보통</td><td class="num">12</td><td>독 ×0.25 · 물리 ×1.15 · 화염 ×1.15</td></tr>
+        <tr><td><b>임프</b> <span class="pill">v47</span></td><td class="num">16</td><td class="num">7</td><td class="num">빠름</td><td class="num">11</td><td>화염 ×0.4 · 냉기 ×1.3</td></tr>
+        <tr><td><b>지옥사냥개</b> <span class="pill">v47</span></td><td class="num">34</td><td class="num">12</td><td class="num">빠름</td><td class="num">18</td><td>화염 ×0.4 · 냉기 ×1.25</td></tr>
+        <tr><td><b>망령</b> <span class="pill">v47</span> (원거리)</td><td class="num">30</td><td class="num">11</td><td class="num">느림</td><td class="num">16</td><td>물리 ×0.6 · 독 ×0.4 · 화염 ×1.2</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">주술사와 <b>망령</b>은 거리를 두고 유도 구체를 쏩니다. 거한은 크고 느린 고HP 탱커.
+    <b>해골</b>은 독을 무시하지만 물리와 화염에 약하고, <b>임프</b>와 <b>지옥사냥개</b>는 화염에 강하고
+    냉기를 싫어하는 빠른 지옥의 사냥꾼입니다.</p>
+    <h3>스폰 위치 <span class="pill">v47</span></h3>
+    <p>각 <b>야생 바이옴</b>은 자기 몬스터 풀에서 뽑습니다. <b>던전</b>은 입장할 때마다 <b>무작위
+    바이옴</b>을 굴리고, 그 바이옴이 테마와 몬스터 풀을 모두 정합니다 — 예: 지하묘지 &amp; 해골 대성당은
+    해골, 얼어붙은 황무지 &amp; 공허는 망령, 지옥 심연(과 깊이 666 인페르노)은 임프와 지옥사냥개 투성이.</p>
+    <h3>속성 피해 유형</h3>
+    <p>피해는 화염, 냉기, 독, 번개, 물리로 구분됩니다. ("콜드"는 냉기로 취급.) 몬스터의 약점 속성으로
+    때리면 더 큰 피해, 저항 속성은 피하세요.</p>
+  </section>
+
+  <!-- ============ ELITES ============ -->
+  <section id="elites">
+    <h2>엘리트 &amp; 챔피언</h2>
+    <p>때때로 오라를 두른 더 강한 몬스터가 스폰됩니다. 엘리트는 <b>×3 HP, ×1.6 피해, ×4 XP</b>에 몸집도
+    크고 하나 이상의 수식어를 가집니다. <b>챔피언</b> 무리는 엘리트 하나에 일반 하수인 셋입니다.</p>
+    <table>
+      <thead><tr><th>수식어</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td><b>날쌘</b></td><td>×1.6 이동 속도.</td></tr>
+        <tr><td><b>강력한</b></td><td>×1.6 피해.</td></tr>
+        <tr><td><b>부정한</b></td><td>×1.6 생명력.</td></tr>
+        <tr><td><b>용암의</b></td><td>화염 저항; 가까이 있으면 <b>죽을 때 폭발</b>해 큰 피해.</td></tr>
+        <tr><td><b>빙결의</b></td><td>냉기 저항; 적중 시 냉각.</td></tr>
+        <tr><td><b>비전의</b></td><td>번개 저항; 비전 투사체 발사.</td></tr>
+        <tr><td><b>맹독의</b> <span class="pill">v49</span></td><td>독 저항.</td></tr>
+      </tbody>
+    </table>
+    <h3>이름 있는 챔피언 <span class="pill">v49</span></h3>
+    <p><a href="#events">챔피언 현상금</a>이 걸린 층에는 하나의 <b>이름 있는 챔피언</b>이 배회합니다 —
+    금색 이름표와 <em>난도질꾼 고어하울</em>, <em>서리송곳니 이미라</em> 같은 이름의 엘리트. 엘리트 수식어
+    위에 <b>×2 HP</b>와 <b>×1.25 피해</b>를 얻습니다. 처치 보상은 후합니다: <b>아이템 5개</b>, 두둑한 골드
+    지갑, <b>포션 2개</b>, <b>50% 확률의 보석</b>.</p>
+    <h3>강화 몬스터</h3>
+    <p>던전 깊이 6부터 일반 몬스터도 점점 커지는 확률 (최대 50%)로 <b>강화</b> 상태로 스폰됩니다:
+    ×1.6 HP, ×1.35 피해, ×1.12 속도, ×1.4 XP, 죽을 때 작은 폭발.</p>
+    <h3>보물 고블린 <span class="pill">v49</span></h3>
+    <p>드물게 (던전 웨이브의 ≈3%) <b>보물 고블린</b>이 황금빛을 두르고 나타납니다. <b>무해</b>하고 즉시
+    <b>도망칩니다</b> — <b>~18초</b> 안에 잡아 죽이지 못하면 도망쳐 아무것도 얻지 못합니다. 잡으면
+    <b>아이템 3–4개</b>, 산더미 골드, <b>60% 확률의 보석</b>.</p>
+    <h3>전리품</h3>
+    <ul class="clean">
+      <li><b>엘리트</b>는 항상 아이템 하나 (여러 판정 중 최상)와 골드, 종종 포션을 떨굽니다.</li>
+      <li><b>일반 몬스터:</b> ~85% 골드, ~30% 아이템 (깊이에 따라 상승), ~12% 포션.</li>
+    </ul>
+  </section>
+
+  <!-- ============ EVENTS ============ -->
+  <section id="events">
+    <h2>던전 층 이벤트 <span class="pill">v49</span></h2>
+    <p>5층마다 보스 외에도, 일반 던전 층은 이제 자체 선택 콘텐츠를 가집니다: 층 현상금, 두세 개의
+    신단, 가끔 나오는 <a href="#elites">보물 고블린</a>.</p>
+
+    <h3>층 현상금</h3>
+    <p>깊이 2부터 보스가 아닌 모든 층은 화면에 표시되는 <b>현상금</b> 하나를 굴립니다. <b>소프트</b>
+    목표입니다 — 완료 여부와 관계없이 아래층 계단은 열려 있습니다 — 하지만 완료하면 보상이 좋습니다.</p>
+    <table>
+      <thead><tr><th>현상금</th><th>목표</th></tr></thead>
+      <tbody>
+        <tr><td><b>처치</b></td><td>몬스터 <code>6 + ⌊깊이/2⌋</code> 마리 처치 (최대 18).</td></tr>
+        <tr><td><b>챔피언</b></td><td>그 층의 <a href="#elites">이름 있는 챔피언</a> 처치 (층의 ≈50%가 이것으로 대체).</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">보상: <b>아이템 2개</b> (ilvl + 2), <b>60–120 골드</b> (+ 깊이 × 10), <b>포션</b>,
+    레벨 경험치의 약 <b>15%</b>.</p>
+
+    <h3>신단</h3>
+    <p>층마다 <b>2–3개</b>의 신단이 스폰되며 각각 <b>1회용</b>입니다 — 다가가서 <span class="kbd">E</span>로
+    교감하세요. 대략 4분의 1은 저주받은 신단이고, 나머지는 세 가지 축복으로 균등 분배됩니다.</p>
+    <table>
+      <thead><tr><th>신단</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td><b>힘의 신단</b></td><td>30초간 피해 +25%.</td></tr>
+        <tr><td><b>신속의 신단</b></td><td>30초간 이동 속도 +30%.</td></tr>
+        <tr><td><b>축복의 신단</b></td><td>최대 생명력의 40% 즉시 회복, 모든 DoT &amp; 냉각 정화.</td></tr>
+        <tr><td><b>바위의 신단</b> <span class="pill">v50</span></td><td>30초간 받는 피해 30% 감소.</td></tr>
+        <tr><td><b>탐욕의 신단</b> <span class="pill">v50</span></td><td>즉시 골드 폭발, 30초간 골드 드롭 2배.</td></tr>
+        <tr><td><b>저주받은 신단</b></td><td>매복을 부릅니다 — 몬스터 무리 등장 — 대신 위험에 대한 보너스 전리품과 골드.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>보물 고블린</h3>
+    <p>도망치는 황금 고블린은 아무 던전 층에서나 나타날 수 있고, 시간 안에 잡지 못하면 전리품을 가지고
+    달아납니다 — 자세한 내용은 <a href="#elites">엘리트 &amp; 챔피언</a> 참고.</p>
+  </section>
+
+  <!-- ============ BOSSES ============ -->
+  <section id="bosses">
+    <h2>보스</h2>
+    <p>보스는 <b>던전 5층마다</b> (깊이 5, 10, 15, …) 지키고 있습니다. 죽이기 전까지 아래로 가는 길을 막습니다.
+    여섯+ 명의 이름 있는 수호자가 층마다 교대하며, 각각 고유한 모델, 오라, 고정 전투 <b>변형</b>을 가집니다.
+    더 깊은 형태는 해당 깊이에 도달해야 로테이션에 합류합니다:</p>
+    <table>
+      <thead><tr><th>보스</th><th>변형</th><th>등장 깊이</th></tr></thead>
+      <tbody>
+        <tr><td><b>포자군주 미코니드</b></td><td>소환사</td><td>5</td></tr>
+        <tr><td><b>신성모독자 아주라스</b></td><td>시전자</td><td>5</td></tr>
+        <tr><td><b>균사의 왕좌</b></td><td>소환사</td><td>5</td></tr>
+        <tr><td><b>무적의 그래블모</b></td><td>거한</td><td>10</td></tr>
+        <tr><td><b>신더윙</b></td><td>거한</td><td>15</td></tr>
+        <tr><td><b>고대 용 피락시스</b></td><td>시전자</td><td>25</td></tr>
+        <tr><td><b>눈사태 흐림가르</b> <span class="pill">v50</span></td><td>거한</td><td>35</td></tr>
+        <tr><td><b>전쟁군주 스컬렌드</b> <span class="pill">v50</span></td><td>거한</td><td>50</td></tr>
+        <tr><td><b>박피자 줄막</b> <span class="pill">v50</span></td><td>소환사</td><td>65</td></tr>
+      </tbody>
+    </table>
+    <p class="muted"><span class="pill">v50</span> 모든 보스는 이제 <b>고유 어빌리티 킷</b>을 씁니다 (브레스
+    원뿔, 퍼지는 고리 파동, HP 50% 쫄 소환 단계, …). 큰 공격은 <b>전조 표시</b>가 있습니다 — 커지는 바닥
+    표시가 피해가 떨어지기 전 회피 시간을 줍니다. 인페르노에서 <b>피락시스</b>를 쓰러뜨리면
+    <b>인페르노의 인장</b>을 줘서 깊이 666으로 가는 웨이포인트가 해금됩니다.</p>
+    <table>
+      <thead><tr><th>변형</th><th>행동</th></tr></thead>
+      <tbody>
+        <tr><td><b>거한</b></td><td>연사 + 지면 강타; 2단계에서 하수인 소환.</td></tr>
+        <tr><td><b>시전자</b></td><td>냉각 연사, 강타, 짧은 순간이동.</td></tr>
+        <tr><td><b>소환사</b></td><td>타락자 소환, 자신에게 보호막, 강타, 연사.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><b>HP 50%</b>에서 보스는 <b>분노</b>합니다 (2단계): 이동 속도 +50%, 더 빠르고 치명적인
+    어빌리티. 보스 공격 재사용 대기도 깊을수록 짧아집니다.</div>
+    <h3>보스 능력치</h3>
+    <div class="formula">HP  = round(380 × (1 + d×0.5 + (d×0.05)²) × difficultyHP)
+DMG = round(14  × (1 + d×0.3 + (d×0.03)²) × difficultyDmg)
+XP  = round(300 × (1 + d×0.6) × difficultyXP)</div>
+    <h3>보스 보상</h3>
+    <ul class="clean">
+      <li><b>아이템 5개</b>, 각각 ilvl + 4의 여러 판정 중 최상 + 강화된 품질.</li>
+      <li><b>150–300 골드</b> (추가로 깊이 × 20).</li>
+      <li><b>생명력 포션 2 + 마나 포션 2.</b></li>
+      <li>다음 층으로 가는 포털이 열립니다.</li>
+    </ul>
+    <h3>인페르노의 군주 벨페고르 <span class="pill">v47</span></h3>
+    <p>비밀 최종 보스가 <b>깊이 666</b>의 <b>인페르노</b>에서 기다립니다 — <em>오직 내려가야만</em> 도달할 수
+    있는 고유 지옥 바이옴 (깊이 선택기로는 이동 불가). 벨페고르는 대략 일반 보스에 <b>×3 HP</b>,
+    <b>×1.5 피해</b>, <b>×4 XP</b>를 얹은 위력이며 (일반 깊이 &amp; 난이도 스케일링 위에), 거대한 몸과
+    가혹한 킷을 가집니다: 쌍 <b>화염 + 냉각 연사</b>, 지면 강타, 짧은 순간이동, 자기 <b>보호막</b>,
+    <b>임프 &amp; 지옥사냥개 무리 소환</b>. 모든 보스처럼 HP 50%에서 분노합니다.</p>
+  </section>
+
+  <!-- ============ SAVE ============ -->
+  <section id="save">
+    <h2>세이브</h2>
+    <table>
+      <thead><tr><th>항목</th><th>값</th></tr></thead>
+      <tbody>
+        <tr><td>캐릭터 슬롯</td><td>3</td></tr>
+        <tr><td>저장소</td><td>브라우저 <code>localStorage</code> (키 <code>sanctuarys_end_saves</code>)</td></tr>
+        <tr><td>세이브 포맷 버전</td><td>7 <span class="pill">v49</span></td></tr>
+        <tr><td>자동 저장</td><td>~8초마다, 지역 변경 시, 레벨업 시.</td></tr>
+      </tbody>
+    </table>
+    <div class="note">세이브는 브라우저에 저장됩니다. 사이트 데이터를 지우거나 다른 브라우저/프로필에서
+    열면 같은 캐릭터가 보이지 않습니다. 포맷 버전이 바뀌면 오래된 세이브는 로드 시 자동으로 상향
+    이전됩니다 — <span class="pill">v49</span> 포맷 <b>7</b>은 액션 바 구성, 스킬 룬 배정, 어빌리티
+    포인트, 보석 주머니 &amp; 가루, 바이옴 발견 상태를 추가하며 기존 캐릭터에 모두 채워 넣습니다.</div>
+    <h3>내보내기 &amp; 가져오기 <span class="pill">v48</span></h3>
+    <p><b>설정 → 세이브</b>를 열어 캐릭터를 백업하거나 옮기세요 — 완전히 오프라인에서 동작합니다:</p>
+    <ul class="clean">
+      <li><b>내보내기</b>는 <em>세 슬롯 전부와 설정</em>을 JSON 덩어리로 씁니다. <b>파일 다운로드</b>로
+      <code>.json</code> 백업을 저장하거나 <b>복사</b>로 클립보드에 넣으세요.</li>
+      <li><b>가져오기</b>는 그 JSON을 다시 받습니다 — 붙여넣거나 (<b>파일 불러오기</b>) <b>가져오기 및
+      새로고침</b>을 누르세요. 확인 후 로컬 세이브 &amp; 설정을 <b>모두 대체</b>하고 게임을 새로 불러옵니다
+      (낮은 포맷은 로드 시 상향 이전). 현재 세이브를 지키려면 먼저 내보내세요.</li>
+    </ul>
+    <p class="muted">위험한 빌드 실험 전 백업하거나, 다른 브라우저, 프로필, PC로 캐릭터를 옮길 때 유용합니다.</p>
+  </section>
+
+  <!-- ============ CHANGELOG ============ -->
+  <section id="changelog">
+    <h2>버전 역사</h2>
+    <p class="lead">각 릴리스에서 추가된 내용, 최신순. 이 위키는 현재
+    <strong>v50</strong>을 다룹니다.</p>
+    <div class="note">확장 프로그램은 <b>v26</b> 베이스라인에서 시작했습니다. 성능 패스와 여덟 가지 엔드게임
+    기능이 그 파일에 적용된 뒤 <b>v30</b>으로 이름이 바뀌었습니다 — v27–v29 스냅샷은 따로 없습니다.
+    초기 릴리스 (v30–v33)는 기능 수준으로 요약하고, 이후 릴리스는 더 자세히 기록했습니다.</div>
+
+    <table>
+      <thead><tr><th>버전</th><th>테마</th><th>추가된 내용</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>v50</b></td>
+          <td>로드맵 릴리스 — 방, 야만용사 &amp; 엔드게임의 첫 열쇠</td>
+          <td>던전 층이 절차적 <b>방-문 배치</b>로 바뀝니다 (실제 충돌이 있는 인스턴스 벽,
+          방 인식 스폰, 미니맵의 벽, 가장 먼 방의 하강 포털, 숨겨진 보물 상자). 새 <b>야만용사</b>
+          직업 (찢어발기기 / 광란 / 충격파) + 스킬 숲의 네 번째 <b>분노</b> 구역. <b>보조 장비 슬롯</b>
+          — 방패 (막기 %), 고서, 화살통 — 무기 속도 등급과 <b>양손 무기</b> 추가. 보스 킷이 데이터 기반이
+          되고 <b>전조 표시가 있는 회피 가능한</b> 어빌리티 보유; 깊이 35/50/65의 새 심층 보스 셋.
+          몬스터는 고유 기술을 얻었고 (거한 돌진-기절, 지옥사냥개 덮치기, 주술사 치유 토템, 망령 측면
+          점멸) 엘리트는 세 가지 지역 장악 옵션을 얻었습니다 (용암 자국, 벽 세우기, 소용돌이). 난이도
+          등급은 메커니즘을 추가하고 (엘리트 옵션 수, 스폰 밀도, 저항 보너스) <b>깊이로 획득</b>합니다
+          (어려움 8 / 지옥 20 / 인페르노 35). <b>인페르노의 인장</b>: 인페르노에서 피락시스를 쓰러뜨려
+          깊이 666 웨이포인트 해금. 새 <b>업적</b>: 골드/가루 보상이 있는 22개 업적. 경제 분리 —
+          판매는 골드, 분해는 가루; 엑조틱 상인이 <b>가루 상점</b>으로 (상자 + 오늘의 유물);
+          오른쪽 클릭 <b>아이템 잠금</b>; 지정 제작 (단일 옵션 재판정/부여). 전설 손길 레어
+          (ilvl 12+), 빌드를 바꾸는 새 유니크 넷, 여섯 부위 직업 세트 셋, 창고 <b>3탭 (240칸)</b> 확장.
+          1등급 이후 스킬 <b>등급 상승</b> + 습득 가능한 기법. 버프 타이머 칩, "…에게 처치됨" 사망
+          기록, 죽어 있던 네 가지 룬 동작 출시, 기절 원천 (지면 강타 / 거한 돌진), 보석 수집가
+          고블린, 야생 <b>사냥</b>, 새 신단 둘. three.js가 <b>자체 호스팅</b>됩니다 — 게임이 CDN
+          의존 없이 로드됩니다. 세이브 포맷 <b>v8</b> (추가 이전).</td>
+        </tr>
+        <tr>
+          <td><b>v49</b></td><td>엔진 재구축, 보석, 어빌리티 &amp; 던전 깊이</td>
+          <td>게임이 모듈식 <code>sanctuary.html</code> + <code>game.js</code> 빌드로 이전 (가져온 모델,
+          텍스처 &amp; HDRI 라이브러리를 쓰는 WebGPU/TSL 렌더러). <b>액션 바 &amp; 어빌리티:</b>
+          디아블로식 6칸 액션 바 (LMB 기본, RMB, 키 1–4); 액티브는 이제 직업 레벨에서 <b>어빌리티
+          포인트로 해금</b> (레벨당 1), 모든 스킬이 자체 <b>룬 트리</b> 획득 (권능 / 가속 / 집중,
+          세 개의 배타적 형태 주요 노드, 핵심). 경험치 바 &amp; 레벨 배지가 바 안으로 이동; 스킬 창이
+          탭 방식으로 (어빌리티 + 패시브 숲). <b>아이템:</b> 슬롯 의존 보너스와 다섯 품질 단계의
+          <b>보석 &amp; 소켓</b>; <b>새 능력치 여섯</b> (매직 파인드, 골드 파인드, 회피, 고정 피해 감소,
+          재사용 대기 감소, 적중 시 생명력); 깊어진 대장장이 — <b>강화 · 재련 · 분해 · 소켓</b> — 과
+          분해로 얻는 새 <b>가루 ✦</b> 제작 재화. <b>세계:</b> 오픈 월드가 세 개의 <b>포털 연결 바이옴
+          지도</b>로 대체 (그린와일드 → 프로스트펜 → 애쉬랜드, 마지막은 깊이 10 잠금); 던전은 직사각형
+          KayKit <b>돌 전당</b>으로 재구축. <b>던전 깊이:</b> 층별 <b>현상금</b> (처치 / 챔피언),
+          <b>신단</b> (힘 / 신속 / 축복 / 저주), <b>이름 있는 챔피언</b>, 도망치는 <b>보물 고블린</b>.
+          캐릭터 창이 이제 모든 능력치를 표시. 세이브 포맷 <b>7</b>로 상향.</td>
+        </tr>
+        <tr>
+          <td><b>v48</b></td><td>오픈 월드 &amp; 세이브 입출력</td>
+          <td>세 개의 분리된 야생 지도가 하나의 큰 <b>오픈 월드</b>로 통합 (~2.4× 확장), 세 개의 동심원
+          <b>바이옴 고리</b> — 그린와일드 (Lv 1) → 프로스트펜 (Lv 7) → 애쉬랜드 (Lv 14) — 멀리 갈수록
+          위험해집니다. 마을은 이제 <b>야생에서 포털을 찾아야</b> 도달; <b>길 &amp; 이정표</b>가 안내하고,
+          마을은 <b>직접 도착해야만</b> 빠른 이동 웨이포인트 연결망에 추가됩니다 (발견 잠금). 더 촘촘한
+          지역별 풍경 (나무, 고사리, 덤불, 꽃)과 바이옴별 실제 <b>지면 색상</b>; 길이 구릉 지형을
+          따라갑니다. 새 <b>설정 → 세이브</b> 탭: 모든 캐릭터 &amp; 설정 <b>내보내기/가져오기</b>
+          (다운로드 / 복사 / 파일 불러오기 / 붙여넣기), 백업이나 브라우저·기기 간 이동용.</td>
+        </tr>
+        <tr>
+          <td><b>v47</b></td><td>스킬, 던전, 마을 &amp; 비밀 보스</td>
+          <td>액션 바의 실시간 <b>스킬 툴팁</b> (피해, 비용, 재사용 대기, 효과). 던전이 입장마다
+          <b>무작위 바이옴</b>을 굴리고 (테마 + 몬스터 풀), 웨이포인트로 <b>이미 도달한 깊이 어디든</b>
+          이동 가능. <b>새 몬스터 넷</b> — 해골, 임프, 지옥사냥개, 망령 — 이 바이옴 풀에 합류. 비밀
+          최종 보스 <b>인페르노의 군주 벨페고르</b>가 고유 지옥 바이옴의 <b>깊이 666</b>에서 대기 (오직
+          내려가야 도달). <b>마을 개편:</b> 새 <b>연금술사</b> NPC가 포션 강화 담당 (대장장이에서 이전,
+          이제 강화 전용); 상인이 <b>더 이상 포션을 팔지 않음</b> (가마솥 무료 보충); 도박은 도박사로
+          통합; 시각적으로 구분되는 세 가지 테마 마을 배치; 더 크고 스크롤 없는 설정 창.</td>
+        </tr>
+        <tr>
+          <td><b>v46</b></td><td>아이템화 &amp; 마을</td>
+          <td>빌드를 강화하는 장비: <b>+스킬</b>, <b>스킬 피해 %</b>, <b>액티브 스킬 피해 %</b>,
+          <b>화염 / 냉기 / 번개 / 독 피해 %</b> 옵션. <b>생명력 &amp; 마나 재생</b> (VIT/ENG와 새 재생
+          옵션에서). <em>원하는</em> 능력치를 부여하는 새 <b>마법부여사</b> (대장장이의 예전 무작위 재판정
+          대체); 대장장이 창이 <b>강화 / 소모품</b> 탭으로 분리. 새 티어-2 마을 <b>엠버홀드</b> (깊이
+          10에 해금)와 <b>보석상</b> (장신구 재판정), <b>고급 상인</b>; <b>도박사</b>가 하이리치 &amp;
+          엠버홀드에 합류. 원치 않는 드롭을 주울 때 골드로 자동 분해하는 <b>전리품 필터</b>. 마을
+          <b>가마솥</b>이 이제 HP 완전 회복과 마나 회복도 함 (포션뿐 아니라).</td>
+        </tr>
+        <tr>
+          <td><b>v45</b></td><td>키 설정, 설정 &amp; UX</td>
+          <td>완전한 <b>키 재지정</b> (설정 → 조작), 하나의 중앙 입력 디스패처 기반. 설정이
+          <b>오디오 / 그래픽 / 게임플레이 / 조작</b> 탭으로 재편. 어두운 배경으로 모달 클릭 통과 수정.
+          선택한 스킬이 기억되고, 10번째 슬롯은 <span class="kbd">0</span>으로 선택. UI 다듬기 (포커스
+          외곽선, 강한 스킬 광택, 툴팁 클램프). 버그 수정: 큰 적 (거한, 보스)에게 근접 공격이 크기를
+          반영해 확실히 적중.</td>
+        </tr>
+        <tr>
+          <td><b>v44</b></td><td>glTF 마을 NPC &amp; QoL</td>
+          <td>마을 NPC를 가져온 모델로 교체 (상인 = 마법사, 대장장이 = 야만용사, 창고 = 도적). 창이나
+          모달이 열려 있을 때 마우스 휠이 카메라를 줌하지 않음. 창고가 8열 80칸 그리드로 확장. 두 종류
+          포션을 무료로 보충하는 새 <b>가마솥</b> 소품. 챔피언 무리 스폰 시 멈춤 수정 (엘리트/보스 조명이
+          이제 조명 예산 준수).</td>
+        </tr>
+        <tr>
+          <td><b>v43</b></td><td>가져온 모델 명단</td>
+          <td>절차적 캐릭터를 내장 <b>애니메이션 glTF 모델</b>로 교체 — 영웅 = KayKit Knight;
+          몬스터 = Quaternius (Orc, Spiky Blob, Yeti, Wizard, 보스는 Demon). 스폰별 스킨드 클론,
+          개체별 애니메이션, 사망 애니메이션.</td>
+        </tr>
+        <tr>
+          <td><b>v42</b></td><td>glTF 개념 증명</td>
+          <td>단일 파일 / <code>file://</code> 제약 안에서 내장 애니메이션 glTF 모델이 동작함을 증명
+          (Khronos Fox, base64 내장, GLTFLoader + AnimationMixer로 로드).</td>
+        </tr>
+        <tr>
+          <td><b>v41</b></td><td>더 풍부한 절차적 모델</td>
+          <td>저폴리 "블롭" 모델을 관절 있는 몬스터, 거구의 악마 보스, 더 상세한 영웅, 더 풍부한 환경
+          소품으로 교체 — 전부 여전히 절차적이며 성능 안전.</td>
+        </tr>
+        <tr>
+          <td><b>v40</b></td><td>아이템 &amp; 등급 개편</td>
+          <td>등급이 이제 아이템의 <b>기본 능력치와 모든 옵션</b>을 배율 (옵션 수뿐 아니라), 높은 등급이
+          실질적으로 더 강해집니다. 드롭 테이블 재균형; 깊이, 엘리트, 보스가 더 좋은 등급 쪽으로 편향.
+          더 많은 기본 아이템, 유니크 +8, 세트 +1 (잿불 걸음꾼). 일부 "유니크"가 고유 효과 없이
+          굴러가던 버그 수정.</td>
+        </tr>
+        <tr>
+          <td><b>v39</b></td><td>그래픽 다듬기</td>
+          <td>바이옴별 <b>색 보정 + 비네트</b>, 전투 타격 VFX (불꽃 + 충격 플래시), 영웅 갑옷의 PBR
+          머티리얼.</td>
+        </tr>
+        <tr>
+          <td><b>v38</b></td><td>성능 수정</td>
+          <td>어빌리티 사용이나 무리 처치 시 끊김/멈춤 제거 (셰이더 재컴파일을 유발하던 예산 외 일시 조명
+          제거; 전리품 &amp; FX 지오메트리/머티리얼 풀링 및 캐시). 떠다니는 전투 텍스트 상한, 레벨업
+          세이브 중복 제거.</td>
+        </tr>
+        <tr>
+          <td><b>v37</b></td><td>앰비언트 오클루전 &amp; 부드러운 그림자</td>
+          <td>SSAO와 부드러운 (PCF) 그림자 추가, 둘 다 설정에서 전환 가능.</td>
+        </tr>
+        <tr>
+          <td><b>v36</b></td><td>PBR 전리품 &amp; 반사</td>
+          <td>무기, 골드, 전리품 드롭에 물리 기반 금속, 절차적 이미지 기반 환경 맵 조명 (반사 토글).</td>
+        </tr>
+        <tr>
+          <td><b>v35</b></td><td>후처리</td>
+          <td>블룸, SMAA 안티앨리어싱, 노출 슬라이더가 있는 ACES 톤 매핑 (A/B 토글). 플레이어 횃불이
+          깊이에 따라 밝아져 깊은 층도 칠흑 같지 않음; 고주사율 모니터의 이동 속도 수정.</td>
+        </tr>
+        <tr>
+          <td><b>v34</b></td><td>콘텐츠 깊이</td>
+          <td><b>상태 효과</b> (화상, 출혈, 중독, 냉각, 기절), 중첩 DoT 프레임워크; 깊이에 따라 깊어지는
+          <b>속성 피해 유형과 몬스터 저항</b>; +10 새 옵션 (속성 &amp; 모든 저항, 치명타 피해 %, 마나
+          흡수, 전체 흡수, 적중 시 화상/출혈); 보스 전투 <b>변형</b> (깊이별 거한 / 시전자 / 소환사);
+          대장장이의 옵션 재판정 (마법부여).</td>
+        </tr>
+        <tr>
+          <td><b>v33</b></td><td>디테일 &amp; 바이옴</td>
+          <td>환경 파티클 재활성화 (눈, 불티, 먼지, 포자)와 잔해 산포 추가; 얼어붙은 황무지, 가라앉은
+          늪, 해골 대성당 같은 새 깊이대 던전 바이옴 도입.</td>
+        </tr>
+        <tr>
+          <td><b>v32</b></td><td>절차적 텍스처 (계속)</td>
+          <td>캔버스 텍스처 팩토리를 캐릭터와 발광 효과로 확장 (천, 피부, 금속, 수정, 용암, 에너지, 화염,
+          물), 텍스처 패스 완료 — 여전히 외부 이미지 파일 없음 (<code>file://</code> 플레이 필수).</td>
+        </tr>
+        <tr>
+          <td><b>v31</b></td><td>절차적 텍스처</td>
+          <td>캔버스 기반 텍스처 팩토리 추가, 큰 표면과 소품에 디테일 맵 적용 (노멀 맵이 있는 지면, 돌,
+          나무), 각 머티리얼 색을 곱해 모든 지역이 팔레트를 유지.</td>
+        </tr>
+        <tr>
+          <td><b>v30</b></td><td>성능 패스 + 엔드게임 기능</td>
+          <td><b>성능:</b> 장면 머티리얼을 저렴한 셰이딩으로 전환, 포인트 조명 예산 추가, 풍경 인스턴싱으로
+          드로우 콜 절감. <b>엔드게임:</b> 포션을 생명력/마나로 분리하고 마나 포션 키 추가; <b>대장장이</b>
+          추가 (장비 &amp; 포션 강화); 캐릭터별 인벤토리/창고 크기와 구매 가능 칸; 골드 싱크 (재입고, 포션
+          대량 구매); 잡템 판매 / 전부 판매; <b>인페르노</b> 난이도와 가파른 후반 깊이 스케일링, <b>전리품
+          행운</b>, "강화" 심층 몬스터, 더 빠른 심층 보스; <b>새 액티브 스킬 9개</b> (지면 강타, 돌진, 전투
+          함성, 비전 구슬, 눈보라, 그림자 걸음, 칼날 부채, 순간이동 폭풍, 재기의 숨결). 세이브 포맷 v5로
+          상향. <span class="muted">(성능 + 엔드게임 작업이 적용된 v26 작업 파일을 v30으로 개명한 것입니다.)</span></td>
+        </tr>
+        <tr>
+          <td><b>v26</b></td><td>베이스라인</td>
+          <td>이 버전 역사가 시작되는 확장 전 빌드, 베이스라인 스냅샷으로 보존. 위의 성능 패스와 여덟 가지
+          엔드게임 기능이 여기에 적용되어 v30이 되었습니다 — v27–v29 스냅샷은 따로 없습니다.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr>
+    <p class="toc-top muted">생츄어리즈 엔드 — 커뮤니티 필드 코덱스. v49 게임 데이터에서 생성.
+    수치는 게임 내 공식을 반영하며, 실제 결과는 난이도, 깊이, 장비에 따라 달라집니다.</p>
+  </section>
+
+</main>
+</div>
+
+<script>
+(function(){
+  // ---- scrollspy: highlight the nav link of the section in view ----
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.side a'));
+  var map = {};
+  links.forEach(function(a){ var id=a.getAttribute('href').slice(1); map[id]=a; });
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));
+  function spy(){
+    var top = window.scrollY + 120, cur = sections[0];
+    for(var i=0;i<sections.length;i++){ if(sections[i].offsetTop<=top) cur=sections[i]; }
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if(cur && map[cur.id]) map[cur.id].classList.add('active');
+  }
+  window.addEventListener('scroll', spy, {passive:true});
+  window.addEventListener('resize', spy);
+  spy();
+
+  // ---- live search: filter rows + whole sections by text ----
+  var q = document.getElementById('q');
+  var noResults = document.getElementById('noResults');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('main tbody tr'));
+  function search(){
+    var term = q.value.trim().toLowerCase();
+    if(!term){
+      document.body.classList.remove('searching');
+      rows.forEach(function(r){ r.classList.remove('hide-row'); });
+      sections.forEach(function(s){ s.classList.remove('has-match'); });
+      noResults.style.display='none';
+      return;
+    }
+    document.body.classList.add('searching');
+    var anySection=false;
+    sections.forEach(function(s){
+      var secText = (s.querySelector('h2') ? s.querySelector('h2').textContent : '').toLowerCase();
+      var secMatch = secText.indexOf(term)>=0;
+      // whole-section prose match (covers paragraphs/lists alongside any table)
+      var textMatch = s.textContent.toLowerCase().indexOf(term)>=0;
+      var secRows = s.querySelectorAll('tbody tr');
+      var rowMatch=false;
+      if(secRows.length){
+        secRows.forEach(function(r){
+          var hit = r.textContent.toLowerCase().indexOf(term)>=0;
+          if(hit){ r.classList.remove('hide-row'); rowMatch=true; }
+          else if(secMatch || textMatch){ r.classList.remove('hide-row'); }
+          else { r.classList.add('hide-row'); }
+        });
+      }
+      var show = secMatch || rowMatch || textMatch;
+      if(show){ s.classList.add('has-match'); anySection=true; }
+      else { s.classList.remove('has-match'); }
+    });
+    noResults.style.display = anySection ? 'none' : 'block';
+  }
+  q.addEventListener('input', search);
+  q.addEventListener('keydown', function(e){ if(e.key==='Escape'){ q.value=''; search(); q.blur(); } });
+})();
+</script>
+</body>
+</html>
